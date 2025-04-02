@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cmath>
+#include <fstream>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image/stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -123,7 +125,42 @@ int limite_negro_y_blanco(float limite) {
     return 0;
 }
 
+// Ascii
+void convertir_en_ascii() {
+    int width, height, channels;
+    unsigned char *img = stbi_load("Pikachu.png", &width, &height, &channels, 0);
+    if(img == NULL) {
+        printf("Error in loading the image\n");
+        exit(1);
+    }
+    size_t img_size = width * height * channels;
+ 
+    // Voy a sacar la luminosidad aparente de los canales de un pixel y luego lo dividire en 21.25 y redondeare hacia arriba (0.01 = 1) tal que puedan dar los
+    //  valores del intervalo [1,12], y asi se le asignara a ese pixel una letra del siguiente arreglo
+    
+    char conversion_caracteres[12] = {'.',',','-','~',':',';','=','!','*','#','$','@'};
+    fstream file;
+    file.open("pikachu.txt",ios::app)
+    if( !file.is_open() ){
+        cout << "Error al abrir el archivo\n";
+        exit(1);
+    };
+
+    for (unsigned char *p = img; p != img + img_size; p += channels) {
+    
+        // aca uso una formula para la luminosidad aparente
+
+        float luminosidad_aparente = (*p) * 0.299 + *(p + 1) * 0.587 + *(p + 2) * 0.114;
+        int indice_de_caracter_correspondiente = ceil(luminosidad_aparente/21.25);
+    
+    }
+
+    stbi_write_png("Pikachu.png", width, height, channels, img, width * channels);
+    stbi_image_free(img);
+    return 0;
+}
+
 int main() {
-    limite_negro_y_blanco(0.5);
+
     return 0;
 }
