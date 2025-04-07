@@ -17,6 +17,21 @@ struct Imagen{
 };
 
 void operacion_1(Imagen *img, const char filename[256]) {
+    /*****
+ 	*	operacion_1
+ 	******
+ 	*	Cicla por todos los pixeles de la imagen, multiplicando el valor de sus canales correspondientes por la atenuación dada.
+ 	******
+ 	*Input:
+ 	*	Imagen *img : Puntero a struct que almacena los datos de la imagen (como ancho, canales, etc.)
+	*	float atenuacion : Atenuacion entre 0 y 1 que sera aplicada a la imagen.
+	*	char filename[256] : Nombre del archivo de la imagen.
+ 	******
+ 	*Returns:
+ 	*	void;
+ 	*****/
+
+
     size_t img_size = img->width * img->height * img->channels;
     unsigned char *img_invertida = new unsigned char[img_size]; 
 
@@ -100,6 +115,22 @@ void operacion_3(Imagen *img,float atenuacion, const char filename[256]) {
 }
 
 void operacion_4(Imagen *img,int limite,const char filename[256]) {
+	/*****
+ 	*	operacion_4
+ 	******
+ 	*	Por cada pixel toma el promedio de los canales y si es menor al limite dado deja todos los canales en 0 (que vendria siendo un pixel negro), si no es
+    *	menor al limite deja todos los canales en 255 que seria un pixel blanco
+ 	******
+ 	*Input:
+ 	*	Imagen *img : Puntero a struct que almacena los datos de la imagen (como ancho, canales, etc.)
+	*	int limite : valor entre 0 y 255 que representara el promedio que deben superar el promedio de los canales de un pixel para ser pixeles blancos, sino
+    *	seran pixeles negros.
+	*	char filename[256] : Nombre del archivo de la imagen.
+ 	******
+ 	*Returns:
+ 	*	void;
+ 	*****/
+
 
     size_t img_size = img->width * img->height * img->channels;
     for (unsigned char *p = img->data; p != img->data + img_size; p += img->channels) {
@@ -125,7 +156,7 @@ void operacion_4(Imagen *img,int limite,const char filename[256]) {
 char** convertir_en_ascii(Imagen *img) {
 
     // *Nota*
-    // en vez de usar la imagen en escala de grises cargandola con 1 canal, use una formula para calcular la luminosidad aparente en a los valores de los canales rgb
+    // en vez de usar la imagen en escala de grises cargandola con 1 canal, use una formula para calcular la luminosidad aparente en a los valores de los canales rgb 
 
     size_t img_size = img->width * img->height * img->channels;
  
