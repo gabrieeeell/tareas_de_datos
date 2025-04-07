@@ -20,11 +20,10 @@ void operacion_1(Imagen *img, const char filename[256]) {
     /*****
  	*	operacion_1
  	******
- 	*	Cicla por todos los pixeles de la imagen, multiplicando el valor de sus canales correspondientes por la atenuación dada.
+ 	*	Hace una reflexion en el "eje x = width/2", tal que para cada pixel la "cordenada x" pasa a ser width - x
  	******
  	*Input:
  	*	Imagen *img : Puntero a struct que almacena los datos de la imagen (como ancho, canales, etc.)
-	*	float atenuacion : Atenuacion entre 0 y 1 que sera aplicada a la imagen.
 	*	char filename[256] : Nombre del archivo de la imagen.
  	******
  	*Returns:
@@ -53,11 +52,8 @@ void operacion_2(Imagen *img, const char filename[256]) {
 	/*****
  	*	operacion_2
  	******
- 	*	Rota 90 grados, pixel por pixel de la imagen, a un nuevo espacio de meoria dinamica con el mismo tamaño de la imagen, usando la formula "nueva_posicion_del_pixel = channels*( (width - x) + width * y)", donde x,y serian 
+ 	*	Rota 90 grados, pixel por pixel de la imagen, a un nuevo espacio de memoria dinamica con el mismo tamaño de la imagen, usando la formula "nueva_posicion_del_pixel = channels*( (width - x) + width * y)", donde x,y serian 
 	*	la posición del pixel originalmente en la imagen (tomando como (0,0) la esquina superior izquierda).
-	*	explicacion formula: la hacer una rotación de 90° a un punto en el plano cartesiano sus cordenadas pasan de (x,y) a (y,-x), pero si tomamos un plano con origen (width/2 , height/2), una rotacion de 90 grados hara una 
-	*	transformación tal que (x,y) -> (width - y, height - x)
-	*	(también se intercambian los valores de el ancho y la altura para que encajen con la imagen rotada)
  	******
  	*Input:
  	*	Imagen *img : Puntero a struct que almacena los datos de la imagen (como ancho, canales, etc.)
@@ -119,12 +115,12 @@ void operacion_4(Imagen *img,int limite,const char filename[256]) {
  	*	operacion_4
  	******
  	*	Por cada pixel toma el promedio de los canales y si es menor al limite dado deja todos los canales en 0 (que vendria siendo un pixel negro), si no es
-    *	menor al limite deja todos los canales en 255 que seria un pixel blanco
+    	*	menor al limite deja todos los canales en 255 que seria un pixel blanco.
  	******
  	*Input:
  	*	Imagen *img : Puntero a struct que almacena los datos de la imagen (como ancho, canales, etc.)
 	*	int limite : valor entre 0 y 255 que representara el promedio que deben superar el promedio de los canales de un pixel para ser pixeles blancos, sino
-    *	seran pixeles negros.
+    	*	seran pixeles negros.
 	*	char filename[256] : Nombre del archivo de la imagen.
  	******
  	*Returns:
@@ -154,14 +150,23 @@ void operacion_4(Imagen *img,int limite,const char filename[256]) {
 }
 
 char** convertir_en_ascii(Imagen *img) {
+	/*****
+ 	*	convertir_en_ascii
+ 	******
+ 	*	La función saca la luminosidad aparente de los canales de un pixel (que da entre 0 y 255) la cual luego se divide en 21.25 y se redondea hacia arriba, tal que pueda dar un valor 
+        *	entero del intervalo [1,12], y asi dependiendo de este valor se le asigna un caracter para representar al pixel
+ 	******
+ 	*Input:
+ 	*	Imagen *img : Puntero a struct que almacena los datos de la imagen (como ancho, canales, etc.)
+ 	******
+ 	*Returns:
+ 	*	char** un arreglo bidimensional de caracteres que representan cada pixel de la imagen dada.
+ 	*****/
 
     // *Nota*
     // en vez de usar la imagen en escala de grises cargandola con 1 canal, use una formula para calcular la luminosidad aparente en a los valores de los canales rgb 
 
     size_t img_size = img->width * img->height * img->channels;
- 
-    // Voy a sacar la luminosidad aparente de los canales de un pixel y luego lo dividire en 21.25 y redondeare hacia arriba (0.01 = 1) tal que puedan dar los
-    //  valores del intervalo [1,12], y asi se le asignara a ese pixel una letra del siguiente arreglo
     
     char conversion_caracteres[12] = {'.',',','-','~',':',';','=','!','*','#','$','@'};
     
@@ -174,11 +179,12 @@ char** convertir_en_ascii(Imagen *img) {
     int x = 0;
     for (unsigned char *p = img->data; p != img->data + img_size; p += img->channels, x++) {
     
-        // aca uso una formula para la luminosidad aparente
+        // aca uso la formula para la luminosidad aparente
 
         float luminosidad_aparente = (*p) * 0.299 + *(p + 1) * 0.587 + *(p + 2) * 0.114;
 
-	// Si la luminosidad_aparente es demasiado alta se coloca un espacio en vez de un caracter
+	// Si la luminosidad_aparente es demasiado alta (el pixel es completamtene blanco) se coloca un espacio en vez de un caracter
+	
 	if (luminosidad_aparente == 255) {
 		arreglo_ascii[y][x] = ' ';
 	} else {
@@ -186,8 +192,8 @@ char** convertir_en_ascii(Imagen *img) {
 		arreglo_ascii[y][x] = conversion_caracteres[indice_de_caracter_correspondiente];
 	};
 
-	//El condicional de abajo verifica si el puntero se encuentra "en el borde derecho de la imagen" osea al final de una linea de pixeles, para poner un salto de linea en el archivo .txt si es asi.
-	//el ultimo indice es img->width
+	//El condicional de abajo verifica si el puntero se encuentra "en el borde derecho de la imagen" osea al final de una linea de pixeles, para poner un salto de linea en el arreglo
+	
 	if (x == (img->width - 1)){
 		x++;
 		arreglo_ascii[y][x] = '\n';
@@ -201,17 +207,34 @@ char** convertir_en_ascii(Imagen *img) {
 };
 
 void save_ascii(char** arreglo_ascii,int height,const char filename[256]) {
+	/*****
+ 	*	save_ascii
+ 	******
+	*	Toma un arreglo bidimensional de caracteres, el cual representa una imagen en ascii art y lo coloca en un archivo .txt para que sea apreciable.
+ 	******
+ 	*Input:
+	*	char** arreglo_ascii : arreglo generado por la funcion "convertir_en_ascii"
+	*	int height : altura original de la imagen que representa el ascii art
+	*	const char filename[256] : nombre del .txt que se va a generar (debe incluir la extension)
+ 	******
+ 	*Returns:
+ 	*	char** un arreglo bidimensional de caracteres que representan cada pixel de la imagen dada.
+ 	*****/
 	ofstream file;
 	file.open(filename,ios::app);
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x >= 0; x++) {
 			file << arreglo_ascii[y][x];
+			// Si encuentra un salto de linea hace que la condicion del bucle x se deje de cumplir (el -17 es un numero negativo arbitrario)
 			if (arreglo_ascii[y][x] == '\n') {
 				x = -17;
 			}
 		}
 	}
-	//Aca deberias borrar la memoria dinamica usada para el array
+	for (int y = 0; y < height; y++) {
+		delete[] arreglo_ascii[y];
+	}
+	delete[] arreglo_ascii;
 	file.close();
 }
 
@@ -236,8 +259,7 @@ void save(Imagen* img, const char* filename) {
 int main() {
     	//Cargamos la imagen
     	Imagen* img = load("Pikachu_para_copiar.jpg");
-	char** arreglo_ascii = convertir_en_ascii(img);
-	save_ascii(arreglo_ascii,256, "pikachu.txt");
+	char** arreglo_ascii = convertir_en_ascii(img); save_ascii(arreglo_ascii,256, "pikachu.txt");
 	//operacion_1(img, "Pikachu.png");
 	//operacion_2(img, "Pikachu.png");
 	//operacion_3(img, 0.5, "Pikachu.png");

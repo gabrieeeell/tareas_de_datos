@@ -13,12 +13,27 @@ Respuesta: La diferencia entre usar un unsigned int versus un unsigned char resi
 
 Pregunta 3: Usando este esquema de almacenamiento unidimensional: ¿Cuál serı́a el ı́ndice del primer pixel del canal azul?
 
-Respuesta:
+Respuesta: En un esquema de almacenamiento unidimensional, se almacenaran los canales de los pixeles uno despues de otro, tal que los 3 primeros indices serian para los canales rojo, azul, verde (Red,Green,Blue) del primer pixel.
+Por lo que el indice 3 representaria el primer canal azul de un pixel (se tendria que usar arrglo[2] para el indice 3)
+
+fuente: https://solarianprogrammer.com/2019/06/10/c-programming-reading-writing-images-stb_image-libraries/
 
 Pregunta 4: ¿Cómo podemos convertir una imagen RGB a escala de grises?
 
-Respuesta:
+Respuesta: Podriamos obtener el promedio de los canales rgb y luego reescribir la imagen con un solo canal usando el promedio calculado, como se hace en el siguiente codigo de la documentacion de stb_image
 
+"""
+for(unsigned char *p = img, *pg = gray_img; p != img + img_size; p += channels, pg += gray_channels) {
+         *pg = (uint8_t)((*p + *(p + 1) + *(p + 2))/3.0);
+         if(channels == 4) {
+             *(pg + 1) = *(p + 3);
+         }
+     }
+"""
+
+También se podria ocupar una formula para la luminosidad aparente del pixel, en vez del promedio.
+
+Fuente: https://solarianprogrammer.com/2019/06/10/c-programming-reading-writing-images-stb_image-libraries/
 
 Fuentes:
 
