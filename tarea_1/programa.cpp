@@ -33,11 +33,12 @@ int atenuacion() {
     return 0;
 }
 
+
 int rotar_90_grados() {
     int width, height, channels;
     unsigned char *p_copia_img = stbi_load("Pikachu_para_copiar.png", &width, &height, &channels, 0); 
     size_t img_size = width * height * channels;
-    unsigned char *img = (unsigned char*)malloc(img_size); 
+    unsigned char *img = new unsigned char[img_size]; 
     if(img == NULL) {
         printf("Error in loading the image\n");
         stbi_image_free(img);
@@ -57,17 +58,17 @@ int rotar_90_grados() {
             }
         }
     }
-
     stbi_write_png("Pikachu.png", new_width, new_height, channels, img, new_width * channels); 
-    stbi_image_free(img);
+    delete[] img;
     return 0;
 }
+
 
 int invertir_eje_x() {
     int width, height, channels;
     unsigned char *p_copia_img = stbi_load("Pikachu_para_copiar.png", &width, &height, &channels, 0); 
     size_t img_size = width * height * channels;
-    unsigned char *img = (unsigned char*)malloc(img_size); 
+    unsigned char *img = new unsigned char[img_size]; 
     if(img == NULL) {
         printf("Error in loading the image\n");
         stbi_image_free(img);
@@ -87,9 +88,10 @@ int invertir_eje_x() {
     }
 
     stbi_write_png("Pikachu.png", width, height, channels, img, width * channels); 
-    stbi_image_free(img);
+    delete[] img;
     return 0;
 }
+
 
 int limite_negro_y_blanco(float limite) {
     int width, height, org_channels;
@@ -125,10 +127,16 @@ int limite_negro_y_blanco(float limite) {
     return 0;
 }
 
+// ^^^^^^^^^^^^^^^^^^
+
 // Ascii
 void convertir_en_ascii() {
     int width, height, channels;
-    unsigned char *img = stbi_load("Pikachu.png", &width, &height, &channels, 0);
+
+    // *Nota*
+    // en vez de usar la imagen en escala de grises cargandola con 1 canal, use una formula para calcular la luminosidad aparente en a los valores de los canales rgb
+
+    unsigned char *img = stbi_load("Pikachu_para_copiar.png", &width, &height, &channels, 0); 
     if(img == NULL) {
         printf("Error in loading the image\n");
         exit(1);
@@ -139,8 +147,8 @@ void convertir_en_ascii() {
     //  valores del intervalo [1,12], y asi se le asignara a ese pixel una letra del siguiente arreglo
     
     char conversion_caracteres[12] = {'.',',','-','~',':',';','=','!','*','#','$','@'};
-    fstream file;
-    file.open("pikachu.txt",ios::app)
+    ofstream file;
+    file.open("pikachu.txt",ios::app);
     if( !file.is_open() ){
         cout << "Error al abrir el archivo\n";
         exit(1);
@@ -151,16 +159,35 @@ void convertir_en_ascii() {
         // aca uso una formula para la luminosidad aparente
 
         float luminosidad_aparente = (*p) * 0.299 + *(p + 1) * 0.587 + *(p + 2) * 0.114;
-        int indice_de_caracter_correspondiente = ceil(luminosidad_aparente/21.25);
-    
-    }
+	//Si la imagen tiene un cuarto canal para la opacidad, este se toma en cuenta multiplicandolo por la luminosidad aparente
 
-    stbi_write_png("Pikachu.png", width, height, channels, img, width * channels);
+	//if (channels == 4) {
+	//	luminosidad_aparente = luminosidad_aparente * *(p + 3);
+	//}
+
+	// Si la luminosidad_aparente es demasiado alta se coloca un espacio en vez de un caracter
+	
+	cout << ceil(luminosidad_aparente/21.25) << endl;
+	if (luminosidad_aparente == 255) { 
+		file << " ";
+	} else {
+	        int indice_de_caracter_correspondiente = ceil(luminosidad_aparente/21.25);
+		file << conversion_caracteres[indice_de_caracter_correspondiente];
+	}
+
+	
+	//El condicional de abajo verifica si el puntero se encuentra "en el borde derecho de la imagen" osea al final de una linea de pixeles, para poner un salto de linea en el archivo .txt si es asi.
+	if ((p + channels - 1 - img)%(width*channels) == (width*channels - 1)){
+		file << "\n";
+	}
+    }
+    file.close();
     stbi_image_free(img);
-    return 0;
+
 }
 
 int main() {
-
-    return 0;
+	
+	rotar_90_grados();
+    	return 0;
 }
