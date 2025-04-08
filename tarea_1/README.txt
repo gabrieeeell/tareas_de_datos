@@ -1,5 +1,4 @@
 Integrantes:
-
 1.- Gabriel Garces 202473555-1
 2.- Gabriel Ordenes 202473521-7
 
@@ -17,11 +16,18 @@ Respuesta:
 
 Pregunta 4: ¿Cómo podemos convertir una imagen RGB a escala de grises?
 
-Respuesta:
+Respuesta: Para convertir una imagen RGB a escala de grises necesitamos cambiar cada uno de los valores de color RGB al de la siguiente formula:
+  (0.299*R + 0.587+G + 0.114*B) 
+Es necesario multiplicar los canales de color por esos porcentajes debido a que permiten conservar la luminosidad del RGB sin conservar los detales del color
+
+Pregunta 6:
+
 
 
 Fuentes:
 
+
 1.- Gonzalez, R. C., & Woods, R. E. (2018). Digital Image Processing, Global Edition. Pearson UK.
 2.- Sierra, F. J. C. (2007). C/C++: curso de programación. Editorial Ra-Ma.
+3.- Miscellaneous image transformations. (s. f.). OpenCV 2.4.13.7 Documentation. Recuperado 6 de abril de 2025, de https://docs-opencv-org.translate.goog/2.4/doc/user_guide/ug_mat.html?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc#basic-operations-with-images
 
