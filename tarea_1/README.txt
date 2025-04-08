@@ -15,8 +15,6 @@ Pregunta 3: Usando este esquema de almacenamiento unidimensional: ¿Cuál serı�
 Respuesta: En un esquema de almacenamiento unidimensional, se almacenaran los canales de los pixeles uno despues de otro, tal que los 3 primeros indices serian para los canales rojo, azul, verde (Red,Green,Blue) del primer pixel.
 Por lo que el indice 3 representaria el primer canal azul de un pixel (se tendria que usar arrglo[2] para el indice 3)
 
-fuente: https://solarianprogrammer.com/2019/06/10/c-programming-reading-writing-images-stb_image-libraries/
-
 Pregunta 4: ¿Cómo podemos convertir una imagen RGB a escala de grises?
 
 Respuesta : Podriamos obtener el promedio de los canales rgb y luego reescribir la imagen con un solo canal usando el promedio calculado, como se hace en el siguiente codigo de la documentacion de stb_image
@@ -30,14 +28,16 @@ for(unsigned char *p = img, *pg = gray_img; p != img + img_size; p += channels, 
      }
 """
 
-También se podria ocupar una formula para la luminosidad aparente del pixel, en vez del promedio.
+También se podria ocupar una formula para la luminosidad aparente del pixel, en vez del promedio. Esta formula vendria siendo  Gris = 0.299⋅R + 0.587⋅G + 0.114⋅B y permite conservar la luminosidad de los pixeles despreciando los detalles del color, dando un tono gris a la imagen RGB
 
-Fuente: https://solarianprogrammer.com/2019/06/10/c-programming-reading-writing-images-stb_image-libraries/
+Pregunta 6: La siguiente implementación de la Operación 4 produce un resultado incorrecto. ¿Cuál es el error, y como podrı́a resolverse a nivel de código? La respuesta puede justificarse
+teóricamente o con código.
+
+Respuesta: el error esta en como el codigo trata los canales de color, ya que para tener un error asi el codigo no esta distinguiendo entre los diferentes canales de color (RGB), por lo cual el codigo esta recorriendo cada pixel como si tuviera un solo canal de color, por lo cual la solucion seria iterar sobre cada canal de color por separado en cada pixel, para esto hay que recordar que los pixeles estan presentados en un arreglo unidimensional, por lo cual se puede iterar en orden por cada canal de color, por ejemplo para acceder a los valores de cada color se tiene: rojo(indices 0, 3, 6,...), verde(indices 1,4,7,...) y azul(indices 2, 5, 8, ...), y ahi aplicar cada modificacion a cada color
+
 
 Fuentes:
-
-
 1.- Gonzalez, R. C., & Woods, R. E. (2018). Digital Image Processing, Global Edition. Pearson UK.
 2.- Sierra, F. J. C. (2007). C/C++: curso de programación. Editorial Ra-Ma.
 3.- Miscellaneous image transformations. (s. f.). OpenCV 2.4.13.7 Documentation. Recuperado 6 de abril de 2025, de https://docs-opencv-org.translate.goog/2.4/doc/user_guide/ug_mat.html?_x_tr_sl=en&_x_tr_tl=es&_x_tr_hl=es&_x_tr_pto=tc#basic-operations-with-images
-
+4.- C Programming - Reading and writing images with the stb_image libraries. (s. f.). Solarian Programmer. Recuperado 7 de abril de 2025, de https://solarianprogrammer.com/2019/06/10/c-programming-reading-writing-images-stb_image-libraries/
