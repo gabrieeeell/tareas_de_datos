@@ -22,13 +22,10 @@ struct NodoMapa{
 	NodoMapa *hijo3;
 };
 
-
 struct arco{
 	int desde; 
 	int hacia; 
 };
-
-
 
 struct enemigo{
 	string nombre;
@@ -66,7 +63,7 @@ void leer_mapa(string nombre_archivo){
 				getline(mapa, linea);
 				
 				size_t espacio = linea.find(" ");
-				habitaciones[i].numero = stoi(linea.substr(0, espacio));
+				habitaciones[i].numero = stoi(linea.substr(0, espacio)); //substr(posicion, total de caracteres a sustraer)
 				
 				size_t parentesis = linea.find ("(");
 				habitaciones[i].nombre = linea.substr(espacio + 1, parentesis - espacio - 2 );
@@ -77,11 +74,13 @@ void leer_mapa(string nombre_archivo){
 				getline(mapa,linea);
 				habitaciones[i].descripcion = linea ;
 				}
+			}
+		else if (linea == "ARCOS"){
+			int total_arcos;
+			total_arcos = getline(mapa, linea);
 
-			break;
-		
 		}
-	
+
 	}
 	
 	
