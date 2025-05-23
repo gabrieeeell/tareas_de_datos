@@ -2,8 +2,26 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <ctime>
+#include <fstream>
+#include <string>
 
 using namespace std;
+
+struct habitacion{
+	int numero;
+	string nombre;
+	string descripcion;
+	string tipo;
+};
+
+struct enemigo{
+	string nombre;
+	int vida;
+	int ataque;
+	int precision;
+	int probabilidad;
+}
+
 
 class Jugador {
 	int vida;
