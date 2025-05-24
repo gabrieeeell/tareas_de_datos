@@ -7,8 +7,17 @@
 
 using namespace std;
 
-struct eventos{
+struct Opciones{
+	string accion;
+	string descripcion;
+	string efecto;
+};
 
+struct Eventos{
+	string nombre;
+	float probabilidad;
+	int numero_opciones;
+	Opciones *opciones; // como pueden hbaer mas de 2 opciones, usamos memoria dinamica
 
 };
 
@@ -35,8 +44,8 @@ struct enemigo{
 	string nombre;
 	int vida;
 	int ataque;
-	int precision;
-	int probabilidad;
+	float precision;
+	float probabilidad;
 };
 
 class Jugador {
@@ -97,7 +106,7 @@ void leer_mapa(string nombre_archivo){
 				arcos_mapa[a].hacia = stoi(linea.substr(flecha + 2));
 			}
 		}
-		
+
 		else if (linea == "ENEMIGOS"){
 			int total_enemigos;
 			getline(mapa,linea);
@@ -108,23 +117,54 @@ void leer_mapa(string nombre_archivo){
 				getline(mapa,linea);
 
 				size_t separador1 = linea.find("|");
-				size_t separador2 = linea.find("|", separador1);
-				size_t separador3 = linea.find("|", separador2);
-				size_t separador4 = linea.find("|", separador3);
+				size_t separador2 = linea.find("|", separador1 + 1);
+				size_t separador3 = linea.find("|", separador2 + 1);
+				size_t separador4 = linea.find("|", separador3 + 1);
 				
-				enemigos_mapa[b].nombre = linea.substr(0, separador - 1);
-				enemigos_mapa[b].vida = stoi(linea.substr(separador2, separador))
-				
-				
-				
+				enemigos_mapa[b].nombre = linea.substr(0, separador1);
+				enemigos_mapa[b].vida = stoi(linea.substr(separador1 + 7, separador2 - separador1 - 2));
+				enemigos_mapa[b].ataque = stoi(linea.substr(separador2 + 8, separador3 - (separador2 + 8) ));
+				enemigos_mapa[b].precision = stof(linea.substr(separador3 + 12, separador4 - (separador3 + 12)));
+				enemigos_mapa[b].probabilidad = stof(linea.substr(separador4 + 14));
+			
+			
 			}
 		}
-	
-	delete[] habitaciones;
-	delete[] arcos_mapa;
+		else if (linea == "EVENTOS"){
+			int total_eventos;
+			getline(mapa,linea);
+			total_eventos = stoi(linea);
+			Eventos *eventos_mapa = new Eventos[total_eventos];
+
+			for (int c = 0 ; c < total_eventos; c++){ //c++ que chistoso miau
+				getline(mapa,linea); // se ubica en los &
+				getline(mapa,linea); // nombre de los eventos
+				eventos_mapa[c].nombre = linea;
+				getline(mapa,linea); //probabilidad de aparicion
+
+				size_t espacio_probabilidad = linea.find(" ");
+				eventos_mapa[c].probabilidad = stof(linea.substr(espacio_probabilidad + 1));
+
+
+				if (linea == "&"){
+					while (getline(mapa,linea)){
+						eventos_mapa[c] = linea;
+						
+						if (linea == Probabilidad){
+							size_t espacio_probabilidad = linea.find(" ");
+							eventos_mapa[c].probabilidad = stof(linea.substr(espacio_probabilidad + 1));
+						}
+						
+						else if (linea)
+					}
+					
+
+				}
+			}
+		}
 	}
 	
-	
+	// NO OLVIDAR BORRAR MEMORIA CAUSA //
 	
 	
 	mapa.close();
