@@ -3,10 +3,14 @@
 #include <unistd.h>
 #include <ctime>
 #include <fstream>
-#include <sstream>
 #include <string>
 
 using namespace std;
+
+struct eventos{
+
+
+};
 
 struct Habitacion{
 	int numero;
@@ -59,7 +63,7 @@ void leer_mapa(string nombre_archivo){
 			total_habitaciones = stoi(linea); //stoi transforma la linea a un int
 			Habitacion *habitaciones = new Habitacion[total_habitaciones];
 			
-			for (int i = 0;i < total_habitaciones; i++){
+			for (int i = 0 ; i < total_habitaciones ; i++){
 				getline(mapa, linea);
 				
 				size_t espacio = linea.find(" ");
@@ -75,12 +79,49 @@ void leer_mapa(string nombre_archivo){
 				habitaciones[i].descripcion = linea ;
 				}
 			}
+		
 		else if (linea == "ARCOS"){
 			int total_arcos;
-			total_arcos = getline(mapa, linea);
-
+			getline(mapa, linea); 
+			total_arcos = stoi(linea);
+			arco *arcos_mapa = new arco[total_arcos];
+			
+			for (int a = 0 ; a < total_arcos; a++ ){
+				getline(mapa,linea);
+				
+				size_t espacio = linea.find(" ");
+				arcos_mapa[a].desde = stoi(linea.substr(0 , espacio));
+				
+				size_t flecha = linea.find("->");
+				
+				arcos_mapa[a].hacia = stoi(linea.substr(flecha + 2));
+			}
 		}
+		
+		else if (linea == "ENEMIGOS"){
+			int total_enemigos;
+			getline(mapa,linea);
+			total_enemigos = stoi(linea);
+			enemigo *enemigos_mapa = new enemigo[total_enemigos];
+			
+			for (int b = 0 ; b < total_enemigos; b++ ){
+				getline(mapa,linea);
 
+				size_t separador1 = linea.find("|");
+				size_t separador2 = linea.find("|", separador1);
+				size_t separador3 = linea.find("|", separador2);
+				size_t separador4 = linea.find("|", separador3);
+				
+				enemigos_mapa[b].nombre = linea.substr(0, separador - 1);
+				enemigos_mapa[b].vida = stoi(linea.substr(separador2, separador))
+				
+				
+				
+			}
+		}
+	
+	delete[] habitaciones;
+	delete[] arcos_mapa;
 	}
 	
 	
