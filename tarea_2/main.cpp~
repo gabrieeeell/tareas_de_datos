@@ -132,6 +132,7 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
         if (true) {
         }
       }
+      cout << "oebe" << endl;
     }
 
     else if (linea == "ARCOS") {
