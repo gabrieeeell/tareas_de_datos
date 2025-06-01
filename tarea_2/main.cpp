@@ -53,63 +53,130 @@ struct Jugador {
   int recuperacion;
 };
 
-struct nodo_cola_enemigo {
-  enemigo contenido;
-  nodo_cola_enemigo *next;
+struct nodo_cola {
+  Jugador *jugador_nodo = nullptr;
+  enemigo *enemigo_nodo = nullptr;
+  nodo_cola *next = nullptr;
 };
 
-struct nodo_cola_jugador {
-  Jugador contenido;
-  nodo_cola_enemigo *next;
-};
+// Variables globales
 
-/*
- Para que la cola funcionara tanto con nodos hechos para el struct Jugador como
- para nodos hechos para el struct enemigo, la cola esta hecha de una forma mas
- rebuscada, primero se asume que el jugador si es que esta, siempre estara al
- frente de la cola, entonces si este no esta en la cola, ahi recien se
- preguntara por el enemigo que este más al frente.
- En el código del combate, esta se usa tal que al principio de cada turno, se
- agregan el jugador y todos los enemigos que esten disponibles para atacar, en
- ese orden.
- Como el alcance de la cola es un turno y el máximo de
- enemigos es 4, la longitud máxima que pudiera alcanzar la cola es 5
- */
+int total_enemigos;
+enemigo *enemigos_mapa;
+string mejoras_de_combate[NUMERO_MAX_MEJORAS_DE_COMBATE];
+int indice_mejoras_de_combate = 0;
 
 class Cola_turnos {
-  nodo_cola_jugador *frente_jugador;
-  nodo_cola_enemigo *frente_enemigo;
-  nodo_cola_enemigo *ultimo_en_cola;
-  int longitud_actual;
+  nodo_cola *frente;
+  nodo_cola *final_cola;
+  int longitud;
 
 public:
   Cola_turnos();
-  void agregar_a_la_cola(enemigo *enemigo_a_agregar = nullptr,
-                         Jugador *jugador_a_agregar = nullptr);
+  int length();
+  void queue(nodo_cola *nuevo_nodo);
+  nodo_cola *
+  dequeue(); // dequeue sera implementado tal que devuelve el frontvalue en vez
+             // de tener una función aparte para esto
 };
 
 Cola_turnos::Cola_turnos() {
-  frente_jugador = nullptr;
-  frente_enemigo = nullptr;
-  ultimo_en_cola = nullptr;
-  longitud_actual = 0;
+  frente = final_cola = nullptr;
+  longitud = 0;
+};
+
+void Cola_turnos::queue(nodo_cola *nuevo_nodo) {
+  if (longitud == 0) {
+    frente = final_cola = nuevo_nodo;
+  } else {
+    final_cola->next = nuevo_nodo;
+    final_cola = nuevo_nodo;
+  }
+  longitud++;
 }
 
-Cola_turnos::agregar_a_la_cola(enemigo *enemigo_a_agregar = nullptr,
-                               Jugador *jugador_a_agregar = nullptr) {
-  if (jugador_a_agregar != nullptr) {
-    nodo_cola_jugador nodo_jugador = new nodo_cola_jugador frente_jugador =
-        jugador_a_agregar;
-  }
+nodo_cola *Cola_turnos::dequeue() {
+  if (longitud == 0)
+    return nullptr;
+
+  nodo_cola *aux = frente;
+  frente = frente->next;
+  longitud--;
+  return aux;
 }
+
+int Cola_turnos::length() { return longitud; }
 
 void mostrar_generacion_texto(string texto, bool saltar_linea = true) {
   for (int i = 0; i < texto.length(); i++) {
     cout << texto[i];
-    cout.flush();  // Sin esto el texto no se muestra hasta el salto de linea
-    usleep(25000); // 0.025 segundos
+    cout.flush(); // Sin esto el texto no se muestra hasta el salto de linea
+    usleep(0);    // 25000 =  0.025 segundos
   }
-  cout << "\n";
+  if (saltar_linea)
+    cout << "\n";
+};
+
+/* ****
+*
+*   void manejar_mejoras_de_combate
+******
+*
+*  Primero se le muestran las opciones al jugador
+******
+*
+Input :
+*
+*   Jugador *jugador : Puntero al struct del jugador
+*   (notar que las mejoras de combate son una variable global por lo que no se
+*   incluye como parametro)
+*
+******
+*   Esta función no tiene returns, las mejoras se manejan solo en la función
+**** */
+void manejar_mejoras_de_combate(Jugador *jugador) {
+  mostrar_generacion_texto("Debes decidir: ");
+  for (int i = 0; i < indice_mejoras_de_combate; i++) {
+
+    // Aca uso substr para leer la palabra que esta después del primer
+    // espacio de la linea
+    string atributo = mejoras_de_combate[i].substr(
+        mejoras_de_combate[i].find(" ") + 1,
+        mejoras_de_combate[i].length() - mejoras_de_combate[i].find(" "));
+    string cantidad_atributo =
+        mejoras_de_combate[i].substr(1, mejoras_de_combate[i].find(" ") - 1);
+
+    mostrar_generacion_texto("\t" + to_string(i) + ". Aumentar " +
+                             (char)tolower(atributo[0]) + atributo.substr(1) +
+                             " en " + cantidad_atributo + ".");
+  }
+
+  string eleccion_usuario;
+
+  cin >> eleccion_usuario;
+
+  string atributo = mejoras_de_combate[stoi(eleccion_usuario)].substr(
+      mejoras_de_combate[stoi(eleccion_usuario)].find(" ") + 1,
+      mejoras_de_combate[stoi(eleccion_usuario)].length() -
+          mejoras_de_combate[stoi(eleccion_usuario)].find(" "));
+
+  string cantidad_atributo = mejoras_de_combate[stoi(eleccion_usuario)].substr(
+      1, mejoras_de_combate[stoi(eleccion_usuario)].find(" ") - 1);
+  if (atributo == "Precision") {
+    jugador->precision += stof(cantidad_atributo);
+    mostrar_generacion_texto("Tu precisión aumento en " + cantidad_atributo +
+                             "!");
+  } else if (atributo == "Vida") {
+    jugador->vida += stoi(cantidad_atributo);
+    mostrar_generacion_texto("Recuperaste " + cantidad_atributo + " de vida!");
+  } else {
+    if (atributo == "ataque")
+      jugador->ataque += stoi(cantidad_atributo);
+    if (atributo == "recuperacion")
+      jugador->recuperacion += stoi(cantidad_atributo);
+    mostrar_generacion_texto("Tu " + atributo + " aumento en " +
+                             cantidad_atributo + "!");
+  }
 };
 
 void empezar_combate(Jugador *jugador, int total_enemigos,
@@ -126,44 +193,157 @@ void empezar_combate(Jugador *jugador, int total_enemigos,
   } else {
     total_enemigos_este_combate = 4;
   }
-  enemigo *enemigos_este_combate = new enemigo[total_enemigos_este_combate];
-
+  nodo_cola *enemigos_este_combate[total_enemigos_este_combate];
   for (int i = 0; i < total_enemigos_este_combate; i++) {
     int rng_seleccion_enemigo =
-        rand() % 10001; // Simula porcentajes de hasta centesimales (0.01),
-                        // debido a que "10000 = 100%" todos los porcentajes se
-                        // tendran que multiplicar por 100
+        rand() % 10001; // Simula porcentajes de hasta centesimales (0.01%),
+                        // tal que "10000 = 100%", tambien para que esto
+                        // funcione, todos los porcentajes que representados
+                        // decimalmente se tendran que multiplicar por 10000
     int porcentaje_acumulado = 0;
     for (int x = 0; x < total_enemigos; x++) {
       if (porcentaje_acumulado < rng_seleccion_enemigo &&
-          rng_seleccion_enemigo < (enemigos_mapa[x].probabilidad * 100)) {
-        enemigos_este_combate[i] = enemigos_mapa[x];
+          rng_seleccion_enemigo < (porcentaje_acumulado +
+                                   (enemigos_mapa[x].probabilidad * 10000))) {
+        enemigos_este_combate[i] =
+            new nodo_cola{nullptr, new enemigo{enemigos_mapa[x]}, nullptr};
+        break;
       }
+      porcentaje_acumulado += enemigos_mapa[x].probabilidad * 10000;
+      // Al usar new, estoy creando una nueva instancia del enemigo, en vez de
+      // hacer una referencia al "original"
     }
   }
+  nodo_cola *nodo_jugador = new nodo_cola{jugador, nullptr, nullptr};
+  // Aca uso directamente la referencia al jugador,
+  // ya que no quiero hacer un clon de el
   for (int i = 0; i < total_enemigos_este_combate; i++) {
-    cout << enemigos_este_combate[i].nombre;
-    if (i < total_enemigos_este_combate - 1) {
+    mostrar_generacion_texto(enemigos_este_combate[i]->enemigo_nodo->nombre,
+                             false);
+    if (i < total_enemigos_este_combate - 2) {
       mostrar_generacion_texto(", ", false);
-    } else if (i == (total_enemigos_este_combate - 1)) {
-      mostrar_generacion_texto(" y ", false);
+    } else if (i == (total_enemigos_este_combate - 2)) {
+      mostrar_generacion_texto("y ", false);
     } else {
       mostrar_generacion_texto("!");
     }
   }
+  // Se agregan el jugador y los enemigos a la cola, estos fueron agregados a
+  // un struct de nodo aparte, para que asi todos los elementos de la cola
+  // puedan tener el mismo tipo
 
-  Cola turnos;
+  Cola_turnos turnos;
+  turnos.queue(nodo_jugador);
+  for (int i = 0; i < total_enemigos_este_combate; i++) {
+    turnos.queue(enemigos_este_combate[i]);
+  }
 
-  // Mientras el ultimo enemigo o el jugador muera, el bucle del combate sigue
-  while (enemigos_este_combate[total_enemigos_este_combate - 1].vida > 0 &&
-         jugador->vida > 0) {
+  // Ciclo principal del combate
+  // La cola turnos solo alcanza longitud 1 cuando queda unicamente el jugador
+  // con vida
+
+  while (turnos.length() > 1 && jugador->vida > 0) {
     // Mostrar nombres jugador y enemigos
     mostrar_generacion_texto("Jugador", false);
     for (int i = 0; i < total_enemigos_este_combate; i++) {
-      mostrar_generacion_texto(" | " + enemigos_este_combate[i].nombre, false);
+      mostrar_generacion_texto(
+          " | " + enemigos_este_combate[i]->enemigo_nodo->nombre, false);
     }
     cout << endl;
     // Mostrar vidas jugador y enemigos
+
+    mostrar_generacion_texto(to_string(nodo_jugador->jugador_nodo->vida),
+                             false);
+    for (int i = 0; i < total_enemigos_este_combate; i++) {
+      mostrar_generacion_texto(
+          " | " + (enemigos_este_combate[i]->enemigo_nodo->vida > 0
+                       ? to_string(enemigos_este_combate[i]->enemigo_nodo->vida)
+                       : "X"),
+          false);
+    }
+    cout << endl;
+
+    // Ataque del combate
+
+    nodo_cola *jugador_o_enemigo_que_ataca = turnos.dequeue();
+
+    if (jugador_o_enemigo_que_ataca->enemigo_nodo == nullptr) {
+
+      // Significa que esta atacando un jugador
+
+      if (rand() % 10001 > jugador->precision * 10000) {
+        mostrar_generacion_texto("Jugador falla!");
+      } else {
+        // Como tanto la cola como el array para los enemigos trabajan
+        // con las direcciones de memoria de los mismos enemigos, puedo
+        // usar la que mas me convenga. Para este caso determine que el
+        // jugador ataca al primer enemigo del array que siga vivo
+
+        for (int i = 0; i < total_enemigos_este_combate; i++) {
+          if (enemigos_este_combate[i]->enemigo_nodo->vida > 0) {
+            enemigos_este_combate[i]->enemigo_nodo->vida -= jugador->ataque;
+            mostrar_generacion_texto(
+                "Jugador golpea a " +
+                enemigos_este_combate[i]->enemigo_nodo->nombre + " por " +
+                to_string(jugador->ataque) + " de daño!");
+            break;
+          }
+        }
+      }
+      turnos.queue(nodo_jugador);
+    } else {
+
+      // Ataca enemigo, el cual podria estar muerto y seguir en la cola
+      // por lo que hay que verificar
+
+      if (jugador_o_enemigo_que_ataca->enemigo_nodo->vida <= 0) {
+        continue;
+      } else {
+
+        if (rand() % 10001 >
+            jugador_o_enemigo_que_ataca->enemigo_nodo->precision * 10000) {
+          mostrar_generacion_texto(
+              jugador_o_enemigo_que_ataca->enemigo_nodo->nombre + " falla!\n");
+        } else {
+          jugador->vida -= jugador_o_enemigo_que_ataca->enemigo_nodo->ataque;
+          mostrar_generacion_texto(
+              jugador_o_enemigo_que_ataca->enemigo_nodo->nombre +
+              " golpea a Jugador por " +
+              to_string(jugador_o_enemigo_que_ataca->enemigo_nodo->ataque) +
+              " de daño!");
+        }
+        turnos.queue(jugador_o_enemigo_que_ataca);
+      }
+    }
+  }
+
+  if (jugador->vida > 0) {
+    // Jugador gano
+    mostrar_generacion_texto("Has sobrevivido el combate!");
+    mostrar_generacion_texto("Recuperas " + to_string(jugador->recuperacion) +
+                             " de vida tras el combate.");
+    manejar_mejoras_de_combate(jugador);
+
+  } else {
+    // jugador murio
+    mostrar_generacion_texto("Jugador", false);
+    for (int i = 0; i < total_enemigos_este_combate; i++) {
+      mostrar_generacion_texto(
+          " | " + enemigos_este_combate[i]->enemigo_nodo->nombre, false);
+    }
+    cout << endl;
+    // Ahora hay que considerar que el jugador podria estar muerto
+
+    mostrar_generacion_texto(
+        jugador->vida > 0 ? (to_string(jugador->vida)) : "X", false);
+    for (int i = 0; i < total_enemigos_este_combate; i++) {
+      mostrar_generacion_texto(
+          " | " + (enemigos_este_combate[i]->enemigo_nodo->vida > 0
+                       ? to_string(enemigos_este_combate[i]->enemigo_nodo->vida)
+                       : "X"),
+          false);
+    }
+    cout << endl;
   }
 };
 
@@ -204,12 +384,6 @@ void texto_elegir_siguiente_sala(NodoMapa *&nodo_habitacion_actual) {
   }
   nodo_habitacion_actual = siguientes_habitaciones[stoi(opcion) - 1];
 }
-
-// Variables globales
-
-int total_enemigos;
-enemigo *enemigos_mapa;
-string mejoras_de_combate[NUMERO_MAX_MEJORAS_DE_COMBATE];
 
 // *& Por lo que usa una referencia al puntero, no una copia del puntero
 
@@ -329,9 +503,8 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
     }
     if (linea == "MEJORAS DE COMBATE") {
       getline(mapa, linea);
-      int indice_mejoras_de_combate = 0;
       while (linea != "FIN DE ARCHIVO") {
-        mejoras_de_combate[indice_mejoras_de_combate] = linea;
+        mejoras_de_combate[indice_mejoras_de_combate++] = linea;
         getline(mapa, linea);
       }
     }
@@ -347,10 +520,7 @@ int main() {
   srand(time(0)); // Esta linea es para generar una seed aleatoria para
                   // los numeros random
 
-  Jugador jugador = {30, 7, 0.95, 3};
-  cout << rand() << endl;
-  cout << rand() << endl;
-  cout << rand() << endl;
+  Jugador *jugador = new Jugador{30, 7, 0.95, 3};
   NodoMapa *nodos_habitaciones;
   leer_mapa("ejemplo.map", nodos_habitaciones);
   NodoMapa *nodo_habitacion_actual = &nodos_habitaciones[0];
@@ -372,6 +542,7 @@ int main() {
         nodo_habitacion_actual->habitacion.tipo + ")");
     mostrar_generacion_texto(nodo_habitacion_actual->habitacion.descripcion);
     if (nodo_habitacion_actual->habitacion.tipo == "COMBATE") {
+      empezar_combate(jugador, total_enemigos, enemigos_mapa);
     }
 
   } while (nodo_habitacion_actual->hijo1 != nullptr ||
