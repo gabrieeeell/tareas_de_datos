@@ -110,8 +110,8 @@ int Cola_turnos::length() { return longitud; }
 void mostrar_generacion_texto(string texto, bool saltar_linea = true) {
   for (int i = 0; i < texto.length(); i++) {
     cout << texto[i];
-    cout.flush();  // Sin esto el texto no se muestra hasta el salto de linea
-    usleep(25000); // 25000 =  0.025 segundos
+    cout.flush(); // Sin esto el texto no se muestra hasta el salto de linea
+    usleep(0);    // 25000 =  0.025 segundos
   }
   if (saltar_linea)
     cout << "\n";
@@ -146,9 +146,15 @@ void manejar_mejoras_de_combate(Jugador *jugador) {
     string cantidad_atributo =
         mejoras_de_combate[i].substr(1, mejoras_de_combate[i].find(" ") - 1);
 
-    mostrar_generacion_texto("\t" + to_string(i) + ". Aumentar " +
-                             (char)tolower(atributo[0]) + atributo.substr(1) +
-                             " en " + cantidad_atributo + ".");
+    if (atributo == "Vida") {
+      mostrar_generacion_texto("\t" + to_string(i) + ". Recuperar " +
+                               cantidad_atributo + " de vida.");
+
+    } else {
+      mostrar_generacion_texto("\t" + to_string(i) + ". Aumentar " +
+                               (char)tolower(atributo[0]) + atributo.substr(1) +
+                               " en " + cantidad_atributo + ".");
+    }
   }
 
   string eleccion_usuario;
@@ -178,8 +184,31 @@ void manejar_mejoras_de_combate(Jugador *jugador) {
                              cantidad_atributo + "!");
   }
 };
-
-void empezar_combate(Jugador *jugador, int total_enemigos,
+/* ****
+ *   bool empezar_combate
+ ******
+ *   La función primero determina aleatoriamente el numero de enemigos que habra
+ *   en el combate (de 1 a 4, con una menor cantidad siendo mas probable), luego
+ *   se determina que enemigos seran.
+ *   Después empieza un bucle que recorre una cola con el jugador y los enemigos
+ *   para determinar a quien le toca atacar, el bucle acaba cuando el jugador o
+ *   los enemigos mueran.
+ *   Finalmente se llama a la función "manejar_mejoras_de_combate" y se libera
+ *   la memoria dinamica utilizada en la función.
+ ******
+ *   Input:
+ *       Jugador *jugador : Puntero al struct del jugador
+ *       int total_enemigos : Numero total de enemigos distintos extraidos del
+ *       .map enemigo *enemigos_mapa : array de structs de los disintos enemigos
+ *       extraidos del .map
+ *
+ ******
+ *   Returns:
+ *       bool resultado_combate : true si el jugador gano el combate, false de
+ *       lo contrario
+ *
+ **** */
+bool empezar_combate(Jugador *jugador, int total_enemigos,
                      enemigo *enemigos_mapa) {
   // elegir cantidad enemigos (maximo 4)
   int rng_enemigo = rand() % 101;
@@ -316,13 +345,15 @@ void empezar_combate(Jugador *jugador, int total_enemigos,
       }
     }
   }
-
+  bool resultado_combate; // true si el jugador gano, false si no.
   if (jugador->vida > 0) {
     // Jugador gano
     mostrar_generacion_texto("Has sobrevivido el combate!");
     mostrar_generacion_texto("Recuperas " + to_string(jugador->recuperacion) +
                              " de vida tras el combate.");
     manejar_mejoras_de_combate(jugador);
+
+    resultado_combate = true;
 
   } else {
     // jugador murio
@@ -332,10 +363,8 @@ void empezar_combate(Jugador *jugador, int total_enemigos,
           " | " + enemigos_este_combate[i]->enemigo_nodo->nombre, false);
     }
     cout << endl;
-    // Ahora hay que considerar que el jugador podria estar muerto
 
-    mostrar_generacion_texto(
-        jugador->vida > 0 ? (to_string(jugador->vida)) : "X", false);
+    mostrar_generacion_texto("X", false);
     for (int i = 0; i < total_enemigos_este_combate; i++) {
       mostrar_generacion_texto(
           " | " + (enemigos_este_combate[i]->enemigo_nodo->vida > 0
@@ -344,7 +373,19 @@ void empezar_combate(Jugador *jugador, int total_enemigos,
           false);
     }
     cout << endl;
+
+    resultado_combate = false;
   }
+
+  // Liberar memoria usada para el combate
+
+  for (int i = 0; i < total_enemigos_este_combate; i++) {
+    delete enemigos_este_combate[i]->enemigo_nodo;
+    delete enemigos_este_combate[i];
+  }
+  delete nodo_jugador;
+
+  return resultado_combate;
 };
 
 void texto_elegir_siguiente_sala(NodoMapa *&nodo_habitacion_actual) {
@@ -542,7 +583,11 @@ int main() {
         nodo_habitacion_actual->habitacion.tipo + ")");
     mostrar_generacion_texto(nodo_habitacion_actual->habitacion.descripcion);
     if (nodo_habitacion_actual->habitacion.tipo == "COMBATE") {
-      empezar_combate(jugador, total_enemigos, enemigos_mapa);
+      bool resultado_combate =
+          empezar_combate(jugador, total_enemigos, enemigos_mapa);
+      if (resultado_combate == false) {
+        // El jugador murio hay que liberar la memoria
+      }
     }
 
   } while (nodo_habitacion_actual->hijo1 != nullptr ||
