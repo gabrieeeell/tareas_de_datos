@@ -60,6 +60,7 @@ struct nodo_cola {
 };
 
 // Variables globales
+bool se_murio = false;
 Eventos *eventos_mapa;
 int total_eventos;
 int total_enemigos;
@@ -108,18 +109,31 @@ nodo_cola *Cola_turnos::dequeue() {
 
 int Cola_turnos::length() { return longitud; }
 
+/*****
+* void mostrar_generacion_texto
+******
+* Muestra el texto de manera progresiva, como en los juegos rpg,
+* es una funcion meramente estetica
+******
+* Input:
+*   string texto : texto que se desea mostrar.
+*   bool saltar_linea : indica si se debe imprimir un salto de línea al final (por defecto true).
+******
+* Returns:
+*   no retorna nada, es una funcion tipo void
+*****/
+
 void mostrar_generacion_texto(string texto, bool saltar_linea = true) {
   for (size_t i = 0; i < texto.length(); i++) {
     cout << texto[i];
     cout.flush(); // Sin esto el texto no se muestra hasta el salto de linea
-    usleep(0);    // 25000 =  0.025 segundos
+    usleep(25000);    // 25000 =  0.025 segundos
   }
   if (saltar_linea)
     cout << "\n";
 };
 
 /* ****
-*
 *   void manejar_mejoras_de_combate
 ******
 *
@@ -207,6 +221,7 @@ void manejar_mejoras_de_combate(Jugador *jugador) {
  *       bool resultado_combate : true si el jugador gano el combate, false de
  *       lo contrario
  **** */
+
 bool empezar_combate(Jugador *jugador, int total_enemigos,
                      enemigo *enemigos_mapa) {
   // elegir cantidad enemigos (maximo 4)
@@ -387,6 +402,20 @@ bool empezar_combate(Jugador *jugador, int total_enemigos,
   return resultado_combate;
 };
 
+/*****
+* void texto_elegir_siguiente_sala
+******
+* Muestra al usuario las habitaciones hijas disponibles para la habitación actual,
+* solicita y valida la elección del usuario, y actualiza el puntero al nodo actual
+* con la habitación seleccionada.
+******
+* Input:
+*   NodoMapa *&nodo_habitacion_actual : referencia al puntero de la habitación actual.
+******
+* Returns:
+*   no retorna nada, es void. Actualiza el nodo actual según la elección del usuario.
+*****/
+
 void texto_elegir_siguiente_sala(NodoMapa *&nodo_habitacion_actual) {
   NodoMapa *siguientes_habitaciones[3] = {
       nullptr, nullptr, nullptr}; // Ya que es un arbol ternario
@@ -426,6 +455,21 @@ void texto_elegir_siguiente_sala(NodoMapa *&nodo_habitacion_actual) {
 }
 
 // *& Por lo que usa una referencia al puntero, no una copia del puntero
+
+/*****
+* void leer_mapa
+******
+* Lee el archivo del mapa y carga las habitaciones, arcos, enemigos, eventos y mejoras
+* en las estructuras dinámicas correspondientes.
+* Actualiza los punteros hijos de cada nodo según los arcos.
+******
+* Input:
+*   string nombre_archivo : nombre del archivo .map a leer.
+*   NodoMapa *&nodos_habitaciones : referencia a puntero donde se almacenarán las habitaciones.
+******
+* Returns:
+*   no retorna valor, es una funcion void. En caso de error al abrir archivo muestra mensaje y retorna.
+*****/
 
 void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
   int total_habitaciones;
@@ -555,6 +599,20 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
   mapa.close();
 }
 
+/*****
+* void efecto_evento
+******
+* Aplica el efecto de un evento sobre las estadísticas del jugador, cambiando sus atributos, despues
+* muestra un mensaje indicando el atributo que se modifico.
+******
+* Input:
+*   Jugador *jugador : puntero al jugador al que se aplicará el efecto.
+*   const string &efecto : cadena de texto con el efecto a aplicar.
+******
+* Returns:
+*   void : no retorna valor.
+*****/
+
 void efecto_evento(Jugador *jugador, const string &efecto){
   char signo_efecto = efecto[0];
   if ((signo_efecto != '+') && (signo_efecto != '-')){
@@ -562,6 +620,7 @@ void efecto_evento(Jugador *jugador, const string &efecto){
     return;
   } 
   size_t espacio = efecto.find(" ");
+  string valor_precision = efecto.substr(1, espacio - 1 ); //valor a imprimir para que aparezca solo un decimal, y no 0.10000 por ejemplo
   float valor = stof(efecto.substr(1, espacio - 1 ));
   string estadistica = efecto.substr(efecto.find(" ") + 1);
 
@@ -574,6 +633,9 @@ void efecto_evento(Jugador *jugador, const string &efecto){
     else if (signo_efecto == '-'){
       jugador->vida -= int(valor); 
       mostrar_generacion_texto("Tu vida disminuyo en " + to_string(int(valor)));
+      if (jugador->vida <= 0){
+        se_murio = true;
+      }
     }
   }
   else if (estadistica == "Ataque"){
@@ -599,11 +661,11 @@ void efecto_evento(Jugador *jugador, const string &efecto){
   else if (estadistica == "Precision"){
     if (signo_efecto == '+'){
       jugador->precision += valor; 
-      mostrar_generacion_texto("Tu precision aumento en " + to_string(int(valor * 100)) + "%");
+      mostrar_generacion_texto("Tu precision aumento en " + valor_precision);
     } 
     else if (signo_efecto == '-'){
       jugador->precision -= valor; 
-      mostrar_generacion_texto("Tu precision disminuyo en " + to_string(int(valor * 100))+ "%");
+      mostrar_generacion_texto("Tu precision disminuyo en " + valor_precision);
     }
     if (jugador->precision > 1.0){
       jugador->precision = 1.0;
@@ -613,12 +675,27 @@ void efecto_evento(Jugador *jugador, const string &efecto){
     }
   }
 }
- 
+/*****
+* void empezar_evento
+******
+* selecciona y ejecuta un evento aleatorio seleccionado según las probabilidades definidas.
+* Muestra la descripción del evento y sus opciones, pide seleccionar una opcion y muestra
+* las consecuencias de esta, al mismo tiempo que modifica las estadisticas del jugador junto al efecto_evento()
+******
+* Input:
+*   Jugador *jugador : puntero al jugador que será afectado por el evento.
+*   Eventos *eventos_mapa : arreglo de eventos posibles.
+*   int total_eventos : número total de eventos en el arreglo.
+******
+* Returns:
+*   no retorna nada, es void
+*****/
+
 void empezar_evento(Jugador *jugador,Eventos *eventos_mapa, int total_eventos){
   int rng_evento = rand() % 10001; 
   int rng_acumulado = 0;
   Eventos * evento_generado = nullptr;
-  for (int i = 0; i < total_eventos; i++ ){
+  for (int i = 0; i < total_eventos; i++ ){ // este ciclo selecciona aleatoriamente un evento
     rng_acumulado += eventos_mapa[i].probabilidad *10000;
     if (rng_evento < rng_acumulado){
       evento_generado = &eventos_mapa[i];
@@ -688,12 +765,22 @@ int main() {
       bool resultado_combate =
           empezar_combate(jugador, total_enemigos, enemigos_mapa);
       if (resultado_combate == false) {
+        nodo_habitacion_actual->hijo1 = nullptr;
+        nodo_habitacion_actual->hijo2 = nullptr;
+        nodo_habitacion_actual->hijo3 = nullptr;
+        mostrar_generacion_texto("Has muerto, FIN. (git gud)");
         // El jugador murio hay que liberar la memoria
       }
     }
     else if (nodo_habitacion_actual->habitacion.tipo == "EVENTO"){
       empezar_evento(jugador, eventos_mapa, total_eventos);
-      
+      if (se_murio == true){
+        nodo_habitacion_actual->hijo1 = nullptr;
+        nodo_habitacion_actual->hijo2 = nullptr;
+        nodo_habitacion_actual->hijo3 = nullptr;
+        mostrar_generacion_texto("Has muerto, FIN. (git gud)");
+      }
+
     }
   } while (nodo_habitacion_actual->hijo1 != nullptr ||
            nodo_habitacion_actual->hijo2 != nullptr ||

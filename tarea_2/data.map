@@ -53,7 +53,6 @@ EVENTOS
 &
 Camioneta blanca
 Probabilidad 0.3
-Ves una camioneta blanca acercarse a toda velocidad, algo anda mal...
 A: Esperar
 Resulto ser Mr. Beast, te regala un chillion de dolares, y una barra de Feastbables. Estaba asqueroso, pero al menos eres chillionario.
 +100 Vida
@@ -63,7 +62,6 @@ Te tropiezas y caes al suelo frente a todos, resulto estar Mr. Beast en la camio
 &
 Encuentro Peligroso
 Probabilidad 0.4
-Un desconocido te pide la hora, pero algo no anda bien...
 A: Revisar el telefono
 Resulta ser un ladrón que te quita el celular y te apuñala.
 -15 Vida
@@ -73,7 +71,6 @@ Te alejas del desconocido, resulto ser un mechero. Te salvas de una apuñala, pe
 &
 Descanso Rápido
 Probabilidad 0.3
-Te sientas a descansar un momento.
 A: Tomar una siesta
 Pierdes el resto del día.
 -100 Vida
