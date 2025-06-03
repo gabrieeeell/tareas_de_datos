@@ -60,7 +60,8 @@ struct nodo_cola {
 };
 
 // Variables globales
-
+Eventos *eventos_mapa;
+int total_eventos;
 int total_enemigos;
 enemigo *enemigos_mapa;
 string mejoras_de_combate[NUMERO_MAX_MEJORAS_DE_COMBATE];
@@ -108,7 +109,7 @@ nodo_cola *Cola_turnos::dequeue() {
 int Cola_turnos::length() { return longitud; }
 
 void mostrar_generacion_texto(string texto, bool saltar_linea = true) {
-  for (int i = 0; i < texto.length(); i++) {
+  for (size_t i = 0; i < texto.length(); i++) {
     cout << texto[i];
     cout.flush(); // Sin esto el texto no se muestra hasta el salto de linea
     usleep(0);    // 25000 =  0.025 segundos
@@ -413,9 +414,9 @@ void texto_elegir_siguiente_sala(NodoMapa *&nodo_habitacion_actual) {
            : ""));
   string opcion = "Lo que no te mate, te infecta wajajaj";
 
-  while (opcion != "1" && opcion != "2" && opcion != "3" ||
-         opcion == "3" && siguiente_habitacion_index < 3 ||
-         opcion == "2" && siguiente_habitacion_index < 2) {
+  while ((opcion != "1" && opcion != "2" && opcion != "3") ||
+         (opcion == "3" && siguiente_habitacion_index < 3) ||
+         (opcion == "2" && siguiente_habitacion_index < 2)) {
     if (opcion != "Lo que no te mate, te infecta wajajaj") {
       cout << "Por favor elija una opción valida" << endl;
     }
@@ -509,10 +510,9 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
         enemigos_mapa[b].probabilidad = stof(linea.substr(separador4 + 14));
       }
     } else if (linea == "EVENTOS") {
-      int total_eventos;
       getline(mapa, linea);
       total_eventos = stoi(linea);
-      Eventos *eventos_mapa = new Eventos[total_eventos];
+      eventos_mapa = new Eventos[total_eventos];
 
       getline(mapa, linea);                     // se ubica en los &
       for (int c = 0; c < total_eventos; c++) { // c++ que chistoso miau
@@ -538,6 +538,7 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
           num_opcion++;
           getline(mapa, linea);
         } while (linea != "&" && linea != "MEJORAS DE COMBATE");
+        eventos_mapa[c].numero_opciones = num_opcion; 
       }
     }
     if (linea == "MEJORAS DE COMBATE") {
@@ -552,6 +553,109 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
   // NO OLVIDAR BORRAR MEMORIA CAUSA //
 
   mapa.close();
+}
+
+void efecto_evento(Jugador *jugador, const string &efecto){
+  char signo_efecto = efecto[0];
+  if ((signo_efecto != '+') && (signo_efecto != '-')){
+    mostrar_generacion_texto("Ninguna consecuencia.");
+    return;
+  } 
+  size_t espacio = efecto.find(" ");
+  float valor = stof(efecto.substr(1, espacio - 1 ));
+  string estadistica = efecto.substr(efecto.find(" ") + 1);
+
+
+  if (estadistica == "Vida"){
+    if (signo_efecto == '+'){
+      jugador->vida += int(valor);
+      mostrar_generacion_texto("Tu vida aumento en " + to_string(int(valor)));
+    }
+    else if (signo_efecto == '-'){
+      jugador->vida -= int(valor); 
+      mostrar_generacion_texto("Tu vida disminuyo en " + to_string(int(valor)));
+    }
+  }
+  else if (estadistica == "Ataque"){
+    if (signo_efecto == '+'){
+      jugador->ataque += int(valor); 
+      mostrar_generacion_texto("Tu ataque aumento en " + to_string(int(valor)));
+    }
+    else if (signo_efecto == '-'){
+      jugador->ataque -= int(valor); 
+      mostrar_generacion_texto("Tu ataque disminuyo en " + to_string(int(valor)));
+    }
+  }
+  else if (estadistica == "Recuperacion"){
+    if (signo_efecto == '+'){
+      jugador->recuperacion += int(valor); 
+      mostrar_generacion_texto("Tu recuperacion aumento en " + to_string(int(valor)));
+    }
+    else if (signo_efecto == '-'){
+      jugador->recuperacion -= int(valor); 
+      mostrar_generacion_texto("Tu recuperacion disminuyo en " + to_string(int(valor)));
+    }
+  }
+  else if (estadistica == "Precision"){
+    if (signo_efecto == '+'){
+      jugador->precision += valor; 
+      mostrar_generacion_texto("Tu precision aumento en " + to_string(int(valor * 100)) + "%");
+    } 
+    else if (signo_efecto == '-'){
+      jugador->precision -= valor; 
+      mostrar_generacion_texto("Tu precision disminuyo en " + to_string(int(valor * 100))+ "%");
+    }
+    if (jugador->precision > 1.0){
+      jugador->precision = 1.0;
+    }
+    if (jugador->precision < 0.0){
+      jugador->precision = 0.0;
+    }
+  }
+}
+ 
+void empezar_evento(Jugador *jugador,Eventos *eventos_mapa, int total_eventos){
+  int rng_evento = rand() % 10001; 
+  int rng_acumulado = 0;
+  Eventos * evento_generado = nullptr;
+  for (int i = 0; i < total_eventos; i++ ){
+    rng_acumulado += eventos_mapa[i].probabilidad *10000;
+    if (rng_evento < rng_acumulado){
+      evento_generado = &eventos_mapa[i];
+      break;
+    }
+  }
+  mostrar_generacion_texto(evento_generado->descripcion);
+
+  for(int i = 0; i < evento_generado->numero_opciones; i++ ){ //ciclo para imprimir las opciones 
+    char letra_opcion = 'A'+ i;
+    mostrar_generacion_texto(string(1,letra_opcion) + ")" + evento_generado->opciones[i].accion);
+  }
+  string eleccion;
+  bool parar_bucle = false;
+  do{
+    
+    mostrar_generacion_texto("Elige una opcion: ");
+    cin >> eleccion;
+    
+    if(eleccion.length() == 1){
+      char letra = toupper(eleccion[0]); // Se transforma la letra de la eleccion del usuario a un caracter
+      int indice = letra - 'A';       // La resta de la opcion elegida menos el caracter A
+                                      // en codigo ASCII, dara un numero que nos ayuda a saber si la opcion
+                                      // elegida es una opcion valida en el evento
+      if (indice >= 0 && indice < evento_generado->numero_opciones){ 
+        mostrar_generacion_texto(evento_generado->opciones[indice].descripcion);
+        efecto_evento(jugador,evento_generado->opciones[indice].efecto);
+        parar_bucle = true;
+      }
+      else {
+        mostrar_generacion_texto("Ingresa una opcion valida.");
+      }  
+    }
+    else {
+      mostrar_generacion_texto("Ingresa una opcion valida.");
+    }
+  }while (!parar_bucle);
 }
 
 int main() {
@@ -587,10 +691,17 @@ int main() {
         // El jugador murio hay que liberar la memoria
       }
     }
-
+    else if (nodo_habitacion_actual->habitacion.tipo == "EVENTO"){
+      empezar_evento(jugador, eventos_mapa, total_eventos);
+      
+    }
   } while (nodo_habitacion_actual->hijo1 != nullptr ||
            nodo_habitacion_actual->hijo2 != nullptr ||
            nodo_habitacion_actual->hijo3 != nullptr);
 
+  delete jugador;
+  delete[] nodos_habitaciones;
+  delete[] enemigos_mapa;
+  delete[] eventos_mapa;
   return 0;
 }
