@@ -1,88 +1,90 @@
 INICIO DE ARCHIVO
 HABITACIONES
-13
-0 Casa (INICIO)
-Despiertas en tu casa con sueño, tienes que llegar a la universidad, pero el camino no es tan simple.
-1 Metro (COMBATE)
-Te subes al metro, parece que todos te quieren golpear.
-2 Cocina (FIN)
-Vas a la cocina a buscar algo para comer, antes de salir de tu casa. Comes tanto que te da sueño. Ir a la universidad no parece tan entretenido despues de todo, por lo cual te vas de vuelta a tu cuarto para dormir, terminando asi otro gran dia :).
-3 Plaza (EVENTO)
-Llegas a una plaza llena de pasteros, sientes que algo podria pasar.
-4 Callejón Oscuro (COMBATE)
-Llegaste a un callejo magico, pareciera que el sol se apago de la nada, te sientes observado.
-5 Iglesia (FIN)
-Sin querer terminaste en una iglesia, un monton de jovenes te convencen de seguir el camino del señor. Abandonas la universidad para convertirte en misionero.
-6 Bar (FIN)
-En tu intento por llegar a la universidad, te dio sed, terminaste en un bar. Tras beber un poco te diste cuenta que la verdadera felicidad la da el alcholismo y no los titulos universitarios. Te desinscribes de la Universidad por medio del siga, nunca antes habbiass experimentado tanta felicidad :) .
-7 Tocata (FIN)
-Tras deambular por la plaza terminaste de algun modo en una tocata indie de un grupo llamado niños del sueño o algo asi, tras un par de minutos moriste de aburriento, fracasando en tu viaje a la U. 
-8 Universidad (EVENTO)
-Llegaste a la universidad, vas entrando mientras esperas que no pase nada malo...
-9 Pasillo universidad (COMBATE)
-Caminando por el pasillo ves a mucha gente que te cae mal, sientes que tienes que pelear.
-10 Sala de clases (FIN)
-Lograste llegar a tu clase de estructuras de datos. Sientes que tus ojos te pesan, desearias estar en tu cama. Tras un parpadeo despiertas en tu casa, fue todo un sueño. Miras por la ventana y ves que es de noche, desaprovechaste un dia entero. FIN
-11 NOAC (FIN)
-Llega al noac, y pasas de todas tus obligacione academicas, a cambio de estar con tus amigos. Fue un buen dia. FIN
-12 Ciac (FIN)
-Te entran ganas de estudiar en el ciac, subes las escaleras, pero sin querer resbalas y te quiebras el cuello, mueres. FIN.
+14
+0 Bosque (INICIO)
+Te adentras en un bosque donde nada es lo que parece
+1 Gruta (EVENTO)
+Investigas la gruta y te encuentras en una situacíón peculiar. 
+2 Sendero (COMBATE)
+Caminas por el sendero, cuando se te acerca un grupo de sospechosos! 
+3 Laguna (EVENTO)
+A la orilla de la laguna encuentras una gema... 
+4 Colina (COMBATE)
+Subes la colina y te encuentras en una batalla! 
+5 Llanura (EVENTO)
+Caminando por la llanura, cansado de tus viajes, notas algo extraño... 
+6 Pantano (FIN)
+Te encuentras en un pantano. El fango se pega a tus pies, y te da tanto asco que mueres :( 
+7 Caverna (FIN)
+Encuentras una apertura diminuta y oscura. Cualquier persona razonable se mantendría alejada, pero has visto muchos tiktok de exploración de cavernas. Te quedas atascado, y despues de una semana te mueres por abstinencia de redes sociales. 
+8 Fondo (FIN)
+Se te olvida que no eres un pez y te adentras al fondo de la laguna. Te encuentras a un pez que se le olvido que no es una persona. Sale al exterior y te reemplaza en la selección chilena. Quedas en el olvido, mientras un pez gana el mundial.
+9 Playa (FIN)
+La playa está tan comoda que te acuestas de chill. Te quedas dormido, y despiertas ayer. *Vuelves al nodo ante-anterior!* (Este es un ejemplo del requisito especial 3)
+10 Neblina (FIN)
+Caminas en subida hasta alcanzar las nubes. Estas mirando el atardecer cuando recuerdas que dejaste el horno prendido! Aún peor, notas que lo que pensabas que era el sol era realmente tu casa a lo lejos...  
+11 Tundra (FIN)
+¿Que es una tundra? Mueres.
+12 Aliens (FIN)
+Te recoge una nave alienígena. Te preguntan tu nombre y por mera casualidad es una palabra que hace cortocircuito en su cerebro! Salvaste a la humanidad :D 
+13 Suenho (FIN)
+Te quedas dormido y sueñas con una tarea de estructuras de datos donde tienes que hacer un juego. Llegas a la parte de escribir la historia y no se te ocurre mejor final que uno en el que el jugador se queda dormido y sueña con una tarea de estructuras de datos donde tienes que hacer un juego. Llegas a la parte de escribir la historia... 
 ARCOS
-19
+13
 0 -> 1
-0 -> 2
-1 -> 5
-1 -> 3
+0 -> 6
+1 -> 2
+1 -> 7
+2 -> 3
 2 -> 4
-2 -> 7
-4 -> 8
-4 -> 6
-8 -> 9
-8 -> 10
-9 -> 11
-9 -> 12
+3 -> 8
+3 -> 9
+4 -> 10
+4 -> 5
+5 -> 11
+5 -> 12
+5 -> 13
 ENEMIGOS
-5
-Ladron | Vida 20 | Ataque 6 | Precision 0.7 | Probabilidad 0.3
-Gato Callejero | Vida 5 | Ataque 2 | Precision 0.9 | Probabilidad 0.2
-Borracho | Vida 15 | Ataque 5 | Precision 0.6 | Probabilidad 0.2
-Perro Callejero | Vida 25 | Ataque 8 | Precision 0.8 | Probabilidad 0.2
-Hippie | Vida 30 | Ataque 7 | Precision 0.5 | Probabilidad 0.1
+4
+Pim | Vida 10 | Ataque 2 | Precision 0.8 | Probabilidad 0.2
+Pomplin | Vida 12 | Ataque 7 | Precision 0.3 | Probabilidad 0.4
+Tomp | Vida 30 | Ataque 100 | Precision 0.001 | Probabilidad 0.1
+Momplin | Vida 1 | Ataque 5 | Precision 1 | Probabilidad 0.3
 EVENTOS
 3
 &
-Camioneta blanca
+Tesoro
 Probabilidad 0.3
-Ves una camioneta blanca acercarse a toda velocidad, algo anda mal...
-A: Esperar
-Resulto ser Mr. Beast, te regala un chillion de dolares, y una barra de Feastbables. Estaba asqueroso, pero al menos eres chillionario.
-+100 Vida
-B: Salir corriendo
-Te tropiezas y caes al suelo frente a todos, resulto estar Mr. Beast en la camioneta, quien grabo todo, la gente pasa y te escupe. Patetico.
--10 Vida
+Encuentras un tesoro!...
+A: Abrirlo
+Era una mímica! El terror afecta tu psique.
+-0.2 PRECISION
+B: Dejarlo
+Se ve sus, lo dejas pasar.
+Ninguna consecuencia.
 &
-Encuentro Peligroso
+Sentimiento
+Probabilidad 0.3
+Te empiezas a sentir extraño...
+A: Te acuestas en el suelo
+Te despiertas muy relajado y feliz!
++10 Vida
+B: Tratas de continuar
+Te mareas, te tropiezas, y te esguinzas la articulación metacarpofalángica!
+-5 Vida
+&
+Silueta
 Probabilidad 0.4
-Un desconocido te pide la hora, pero algo no anda bien...
-A: Revisar el telefono
-Resulta ser un ladrón que te quita el celular y te apuñala.
--15 Vida
-B: Ignorar y seguir
-Te alejas del desconocido, resulto ser un mechero. Te salvas de una apuñala, pero quedaste sicosiado, miras atento a tu entorno.
-+0.3 Precision
-&
-Descanso Rápido
-Probabilidad 0.3
-Te sientas a descansar un momento.
-A: Tomar una siesta
-Pierdes el resto del día.
--100 Vida
-B: Levantarte rápido
-Te sientes renovado y fuerte.
-+10 Ataque
+Ves una silueta misteriosa a lo lejos.
+A: La tratas de dibujar.
+Logras un dibujo excelente, impresionando a todos tus amigos!
++7 Vida
+B: Lo tratas de identificar.
+Tras horas de forzar la vista logras entender que era una mancha en el cielo simplemente. Tu vista se agotó.
+-0.3 Precision
 MEJORAS DE COMBATE
-+5 Vida
-+0.2 Precision
-+2 Ataque
++4 Vida
++0.1 Precision
++1 Ataque
 +1 Recuperacion
 FIN DE ARCHIVO

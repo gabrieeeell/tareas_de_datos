@@ -110,24 +110,25 @@ nodo_cola *Cola_turnos::dequeue() {
 int Cola_turnos::length() { return longitud; }
 
 /*****
-* void mostrar_generacion_texto
-******
-* Muestra el texto de manera progresiva, como en los juegos rpg,
-* es una funcion meramente estetica
-******
-* Input:
-*   string texto : texto que se desea mostrar.
-*   bool saltar_linea : indica si se debe imprimir un salto de línea al final (por defecto true).
-******
-* Returns:
-*   no retorna nada, es una funcion tipo void
-*****/
+ * void mostrar_generacion_texto
+ ******
+ * Muestra el texto de manera progresiva, como en los juegos rpg,
+ * es una funcion meramente estetica
+ ******
+ * Input:
+ *   string texto : texto que se desea mostrar.
+ *   bool saltar_linea : indica si se debe imprimir un salto de línea al final
+ *(por defecto true).
+ ******
+ * Returns:
+ *   no retorna nada, es una funcion tipo void
+ *****/
 
 void mostrar_generacion_texto(string texto, bool saltar_linea = true) {
   for (size_t i = 0; i < texto.length(); i++) {
     cout << texto[i];
-    cout.flush(); // Sin esto el texto no se muestra hasta el salto de linea
-    usleep(25000);    // 25000 =  0.025 segundos
+    cout.flush();  // Sin esto el texto no se muestra hasta el salto de linea
+    usleep(25000); // 25000 =  0.025 segundos (25000 microsegundos)
   }
   if (saltar_linea)
     cout << "\n";
@@ -257,6 +258,7 @@ bool empezar_combate(Jugador *jugador, int total_enemigos,
       // hacer una referencia al "original"
     }
   }
+
   nodo_cola *nodo_jugador = new nodo_cola{jugador, nullptr, nullptr};
   // Aca uso directamente la referencia al jugador,
   // ya que no quiero hacer un clon de el
@@ -271,6 +273,7 @@ bool empezar_combate(Jugador *jugador, int total_enemigos,
       mostrar_generacion_texto("!");
     }
   }
+
   // Se agregan el jugador y los enemigos a la cola, estos fueron agregados a
   // un struct de nodo aparte, para que asi todos los elementos de la cola
   // puedan tener el mismo tipo
@@ -403,18 +406,20 @@ bool empezar_combate(Jugador *jugador, int total_enemigos,
 };
 
 /*****
-* void texto_elegir_siguiente_sala
-******
-* Muestra al usuario las habitaciones hijas disponibles para la habitación actual,
-* solicita y valida la elección del usuario, y actualiza el puntero al nodo actual
-* con la habitación seleccionada.
-******
-* Input:
-*   NodoMapa *&nodo_habitacion_actual : referencia al puntero de la habitación actual.
-******
-* Returns:
-*   no retorna nada, es void. Actualiza el nodo actual según la elección del usuario.
-*****/
+ * void texto_elegir_siguiente_sala
+ ******
+ * Muestra al usuario las habitaciones hijas disponibles para la habitación
+ *actual, solicita y valida la elección del usuario, y actualiza el puntero al
+ *nodo actual con la habitación seleccionada.
+ ******
+ * Input:
+ *   NodoMapa *&nodo_habitacion_actual : referencia al puntero de la habitación
+ *actual.
+ ******
+ * Returns:
+ *   no retorna nada, es void. Actualiza el nodo actual según la elección del
+ *usuario.
+ *****/
 
 void texto_elegir_siguiente_sala(NodoMapa *&nodo_habitacion_actual) {
   NodoMapa *siguientes_habitaciones[3] = {
@@ -457,19 +462,21 @@ void texto_elegir_siguiente_sala(NodoMapa *&nodo_habitacion_actual) {
 // *& Por lo que usa una referencia al puntero, no una copia del puntero
 
 /*****
-* void leer_mapa
-******
-* Lee el archivo del mapa y carga las habitaciones, arcos, enemigos, eventos y mejoras
-* en las estructuras dinámicas correspondientes.
-* Actualiza los punteros hijos de cada nodo según los arcos.
-******
-* Input:
-*   string nombre_archivo : nombre del archivo .map a leer.
-*   NodoMapa *&nodos_habitaciones : referencia a puntero donde se almacenarán las habitaciones.
-******
-* Returns:
-*   no retorna valor, es una funcion void. En caso de error al abrir archivo muestra mensaje y retorna.
-*****/
+ * void leer_mapa
+ ******
+ * Lee el archivo del mapa y carga las habitaciones, arcos, enemigos, eventos y
+ *mejoras en las estructuras dinámicas correspondientes. Actualiza los punteros
+ *hijos de cada nodo según los arcos.
+ ******
+ * Input:
+ *   string nombre_archivo : nombre del archivo .map a leer.
+ *   NodoMapa *&nodos_habitaciones : referencia a puntero donde se almacenarán
+ *las habitaciones.
+ ******
+ * Returns:
+ *   no retorna valor, es una funcion void. En caso de error al abrir archivo
+ *muestra mensaje y retorna.
+ *****/
 
 void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
   int total_habitaciones;
@@ -532,6 +539,7 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
     }
 
     else if (linea == "ENEMIGOS") {
+
       getline(mapa, linea);
       total_enemigos = stoi(linea);
       enemigos_mapa = new enemigo[total_enemigos];
@@ -554,6 +562,7 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
         enemigos_mapa[b].probabilidad = stof(linea.substr(separador4 + 14));
       }
     } else if (linea == "EVENTOS") {
+
       getline(mapa, linea);
       total_eventos = stoi(linea);
       eventos_mapa = new Eventos[total_eventos];
@@ -573,7 +582,9 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
         getline(mapa, linea);
 
         int num_opcion = 0;
+
         do {
+
           eventos_mapa[c].opciones[num_opcion].accion = linea.substr(3);
           getline(mapa, linea);
           eventos_mapa[c].opciones[num_opcion].descripcion = linea;
@@ -582,10 +593,11 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
           num_opcion++;
           getline(mapa, linea);
         } while (linea != "&" && linea != "MEJORAS DE COMBATE");
-        eventos_mapa[c].numero_opciones = num_opcion; 
+        eventos_mapa[c].numero_opciones = num_opcion;
       }
     }
     if (linea == "MEJORAS DE COMBATE") {
+
       getline(mapa, linea);
       while (linea != "FIN DE ARCHIVO") {
         mejoras_de_combate[indice_mejoras_de_combate++] = linea;
@@ -600,139 +612,142 @@ void leer_mapa(string nombre_archivo, NodoMapa *&nodos_habitaciones) {
 }
 
 /*****
-* void efecto_evento
-******
-* Aplica el efecto de un evento sobre las estadísticas del jugador, cambiando sus atributos, despues
-* muestra un mensaje indicando el atributo que se modifico.
-******
-* Input:
-*   Jugador *jugador : puntero al jugador al que se aplicará el efecto.
-*   const string &efecto : cadena de texto con el efecto a aplicar.
-******
-* Returns:
-*   void : no retorna valor.
-*****/
+ * void efecto_evento
+ ******
+ * Aplica el efecto de un evento sobre las estadísticas del jugador, cambiando
+ *sus atributos, despues muestra un mensaje indicando el atributo que se
+ *modifico.
+ ******
+ * Input:
+ *   Jugador *jugador : puntero al jugador al que se aplicará el efecto.
+ *   const string &efecto : cadena de texto con el efecto a aplicar.
+ ******
+ * Returns:
+ *   void : no retorna valor.
+ *****/
 
-void efecto_evento(Jugador *jugador, const string &efecto){
+void efecto_evento(Jugador *jugador, const string &efecto) {
   char signo_efecto = efecto[0];
-  if ((signo_efecto != '+') && (signo_efecto != '-')){
+  if ((signo_efecto != '+') && (signo_efecto != '-')) {
     mostrar_generacion_texto("Ninguna consecuencia.");
     return;
-  } 
+  }
   size_t espacio = efecto.find(" ");
-  string valor_precision = efecto.substr(1, espacio - 1 ); //valor a imprimir para que aparezca solo un decimal, y no 0.10000 por ejemplo
-  float valor = stof(efecto.substr(1, espacio - 1 ));
+  string valor_precision =
+      efecto.substr(1, espacio - 1); // valor a imprimir para que aparezca solo
+                                     // un decimal, y no 0.10000 por ejemplo
+  float valor = stof(efecto.substr(1, espacio - 1));
   string estadistica = efecto.substr(efecto.find(" ") + 1);
 
-
-  if (estadistica == "Vida"){
-    if (signo_efecto == '+'){
+  if (estadistica == "Vida") {
+    if (signo_efecto == '+') {
       jugador->vida += int(valor);
       mostrar_generacion_texto("Tu vida aumento en " + to_string(int(valor)));
-    }
-    else if (signo_efecto == '-'){
-      jugador->vida -= int(valor); 
+    } else if (signo_efecto == '-') {
+      jugador->vida -= int(valor);
       mostrar_generacion_texto("Tu vida disminuyo en " + to_string(int(valor)));
-      if (jugador->vida <= 0){
+      if (jugador->vida <= 0) {
         se_murio = true;
       }
     }
-  }
-  else if (estadistica == "Ataque"){
-    if (signo_efecto == '+'){
-      jugador->ataque += int(valor); 
+  } else if (estadistica == "Ataque") {
+    if (signo_efecto == '+') {
+      jugador->ataque += int(valor);
       mostrar_generacion_texto("Tu ataque aumento en " + to_string(int(valor)));
+    } else if (signo_efecto == '-') {
+      jugador->ataque -= int(valor);
+      mostrar_generacion_texto("Tu ataque disminuyo en " +
+                               to_string(int(valor)));
     }
-    else if (signo_efecto == '-'){
-      jugador->ataque -= int(valor); 
-      mostrar_generacion_texto("Tu ataque disminuyo en " + to_string(int(valor)));
+  } else if (estadistica == "Recuperacion") {
+    if (signo_efecto == '+') {
+      jugador->recuperacion += int(valor);
+      mostrar_generacion_texto("Tu recuperacion aumento en " +
+                               to_string(int(valor)));
+    } else if (signo_efecto == '-') {
+      jugador->recuperacion -= int(valor);
+      mostrar_generacion_texto("Tu recuperacion disminuyo en " +
+                               to_string(int(valor)));
     }
-  }
-  else if (estadistica == "Recuperacion"){
-    if (signo_efecto == '+'){
-      jugador->recuperacion += int(valor); 
-      mostrar_generacion_texto("Tu recuperacion aumento en " + to_string(int(valor)));
-    }
-    else if (signo_efecto == '-'){
-      jugador->recuperacion -= int(valor); 
-      mostrar_generacion_texto("Tu recuperacion disminuyo en " + to_string(int(valor)));
-    }
-  }
-  else if (estadistica == "Precision"){
-    if (signo_efecto == '+'){
-      jugador->precision += valor; 
+  } else if (estadistica == "Precision") {
+    if (signo_efecto == '+') {
+      jugador->precision += valor;
       mostrar_generacion_texto("Tu precision aumento en " + valor_precision);
-    } 
-    else if (signo_efecto == '-'){
-      jugador->precision -= valor; 
+    } else if (signo_efecto == '-') {
+      jugador->precision -= valor;
       mostrar_generacion_texto("Tu precision disminuyo en " + valor_precision);
     }
-    if (jugador->precision > 1.0){
+    if (jugador->precision > 1.0) {
       jugador->precision = 1.0;
     }
-    if (jugador->precision < 0.0){
+    if (jugador->precision < 0.0) {
       jugador->precision = 0.0;
     }
   }
 }
 /*****
-* void empezar_evento
-******
-* selecciona y ejecuta un evento aleatorio seleccionado según las probabilidades definidas.
-* Muestra la descripción del evento y sus opciones, pide seleccionar una opcion y muestra
-* las consecuencias de esta, al mismo tiempo que modifica las estadisticas del jugador junto al efecto_evento()
-******
-* Input:
-*   Jugador *jugador : puntero al jugador que será afectado por el evento.
-*   Eventos *eventos_mapa : arreglo de eventos posibles.
-*   int total_eventos : número total de eventos en el arreglo.
-******
-* Returns:
-*   no retorna nada, es void
-*****/
+ * void empezar_evento
+ ******
+ * selecciona y ejecuta un evento aleatorio seleccionado según las
+ *probabilidades definidas. Muestra la descripción del evento y sus opciones,
+ *pide seleccionar una opcion y muestra las consecuencias de esta, al mismo
+ *tiempo que modifica las estadisticas del jugador junto al efecto_evento()
+ ******
+ * Input:
+ *   Jugador *jugador : puntero al jugador que será afectado por el evento.
+ *   Eventos *eventos_mapa : arreglo de eventos posibles.
+ *   int total_eventos : número total de eventos en el arreglo.
+ ******
+ * Returns:
+ *   no retorna nada, es void
+ *****/
 
-void empezar_evento(Jugador *jugador,Eventos *eventos_mapa, int total_eventos){
-  int rng_evento = rand() % 10001; 
+void empezar_evento(Jugador *jugador, Eventos *eventos_mapa,
+                    int total_eventos) {
+  int rng_evento = rand() % 10001;
   int rng_acumulado = 0;
-  Eventos * evento_generado = nullptr;
-  for (int i = 0; i < total_eventos; i++ ){ // este ciclo selecciona aleatoriamente un evento
-    rng_acumulado += eventos_mapa[i].probabilidad *10000;
-    if (rng_evento < rng_acumulado){
+  Eventos *evento_generado = nullptr;
+  for (int i = 0; i < total_eventos;
+       i++) { // este ciclo selecciona aleatoriamente un evento
+    rng_acumulado += eventos_mapa[i].probabilidad * 10000;
+    if (rng_evento < rng_acumulado) {
       evento_generado = &eventos_mapa[i];
       break;
     }
   }
   mostrar_generacion_texto(evento_generado->descripcion);
 
-  for(int i = 0; i < evento_generado->numero_opciones; i++ ){ //ciclo para imprimir las opciones 
-    char letra_opcion = 'A'+ i;
-    mostrar_generacion_texto(string(1,letra_opcion) + ")" + evento_generado->opciones[i].accion);
+  for (int i = 0; i < evento_generado->numero_opciones;
+       i++) { // ciclo para imprimir las opciones
+    char letra_opcion = 'A' + i;
+    mostrar_generacion_texto(string(1, letra_opcion) + ")" +
+                             evento_generado->opciones[i].accion);
   }
   string eleccion;
   bool parar_bucle = false;
-  do{
-    
+  do {
+
     mostrar_generacion_texto("Elige una opcion: ");
     cin >> eleccion;
-    
-    if(eleccion.length() == 1){
-      char letra = toupper(eleccion[0]); // Se transforma la letra de la eleccion del usuario a un caracter
-      int indice = letra - 'A';       // La resta de la opcion elegida menos el caracter A
-                                      // en codigo ASCII, dara un numero que nos ayuda a saber si la opcion
-                                      // elegida es una opcion valida en el evento
-      if (indice >= 0 && indice < evento_generado->numero_opciones){ 
+
+    if (eleccion.length() == 1) {
+      char letra = toupper(eleccion[0]); // Se transforma la letra de la
+                                         // eleccion del usuario a un caracter
+      int indice =
+          letra - 'A'; // La resta de la opcion elegida menos el caracter A
+                       // en codigo ASCII, dara un numero que nos ayuda a saber
+                       // si la opcion elegida es una opcion valida en el evento
+      if (indice >= 0 && indice < evento_generado->numero_opciones) {
         mostrar_generacion_texto(evento_generado->opciones[indice].descripcion);
-        efecto_evento(jugador,evento_generado->opciones[indice].efecto);
+        efecto_evento(jugador, evento_generado->opciones[indice].efecto);
         parar_bucle = true;
-      }
-      else {
+      } else {
         mostrar_generacion_texto("Ingresa una opcion valida.");
-      }  
-    }
-    else {
+      }
+    } else {
       mostrar_generacion_texto("Ingresa una opcion valida.");
     }
-  }while (!parar_bucle);
+  } while (!parar_bucle);
 }
 
 int main() {
@@ -742,7 +757,7 @@ int main() {
 
   Jugador *jugador = new Jugador{30, 7, 0.95, 3};
   NodoMapa *nodos_habitaciones;
-  leer_mapa("ejemplo.map", nodos_habitaciones);
+  leer_mapa("data.map", nodos_habitaciones);
   NodoMapa *nodo_habitacion_actual = &nodos_habitaciones[0];
 
   mostrar_generacion_texto(
@@ -769,18 +784,15 @@ int main() {
         nodo_habitacion_actual->hijo2 = nullptr;
         nodo_habitacion_actual->hijo3 = nullptr;
         mostrar_generacion_texto("Has muerto, FIN. (git gud)");
-        // El jugador murio hay que liberar la memoria
       }
-    }
-    else if (nodo_habitacion_actual->habitacion.tipo == "EVENTO"){
+    } else if (nodo_habitacion_actual->habitacion.tipo == "EVENTO") {
       empezar_evento(jugador, eventos_mapa, total_eventos);
-      if (se_murio == true){
+      if (se_murio == true) {
         nodo_habitacion_actual->hijo1 = nullptr;
         nodo_habitacion_actual->hijo2 = nullptr;
         nodo_habitacion_actual->hijo3 = nullptr;
         mostrar_generacion_texto("Has muerto, FIN. (git gud)");
       }
-
     }
   } while (nodo_habitacion_actual->hijo1 != nullptr ||
            nodo_habitacion_actual->hijo2 != nullptr ||
