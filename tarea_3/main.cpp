@@ -1,12 +1,60 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#define NUM_MAX_COLA 1000 //se asume que este numero sera mayor o como minimo igual al numero total de nodos del archivo
+#define INFINITO 1000000000
+
 using namespace std;
+
 
 struct nodo {
   int data;
   nodo *next = nullptr;
 };
+
+class tCola{
+  int* datos;
+  int inicio;
+  int fin;
+  int tamaño;
+
+public:
+  
+  tCola(){
+    tamaño = 0;
+    inicio = 0;
+    fin = 0;
+    datos = new int[NUM_MAX_COLA];  
+  }
+  ~tCola(){
+    delete[] datos;
+  }
+  void clear(){
+    tamaño = 0;
+    inicio = 0;
+    fin = 0;
+  
+  }
+  void enqueue(int elemento){
+    if(fin < NUM_MAX_COLA){
+      datos[fin++] = elemento;
+      tamaño++;
+    }
+  }
+  bool vacia(){
+    return tamaño == 0;
+  }
+  void dequeue(){
+    if (!vacia()){
+      inicio++;
+      tamaño --;
+    }
+  }
+  int frontValue(){
+    return datos[inicio];
+  }
+};
+
 
 // Variables globales (*Revisar si acaban teniendo necesidad de ser gloabales*)
 
@@ -19,6 +67,8 @@ struct nodo {
 
 // Notar que todas las listas enlazdas empiezan con un nodo con un dato que no
 // se usa
+void bfs(nodo* lista_vertices, int numero_vertices, int nodo_inicial,int* distancia, int* predecesor);
+
 class ListaAdyacencia {
   nodo *lista_vertices;
   int numero_vertices; // (numero de nodos)
@@ -33,6 +83,8 @@ public:
   int agregar_ubicacion_uber(int ubicacion);
   int *obtener_ubicaciones_ubers();
   nodo *obtener_lista_de_vertices();
+  int solicitar_uber(int nodo_inicio, int nodo_final); //por terminar
+  int encontrar_uber_mas_cerca(int nodo_pasajero, int &monto_uber);// usar bfs para encontrar el uber mas cercano, deberia devolver el nodo uber
 };
 
 ListaAdyacencia::ListaAdyacencia(int num_vertices, int num_aristas,
@@ -78,6 +130,88 @@ int *ListaAdyacencia::obtener_ubicaciones_ubers() { return ubicaciones_uber; }
 
 nodo *ListaAdyacencia::obtener_lista_de_vertices() { return lista_vertices; }
 
+int ListaAdyacencia::encontrar_uber_mas_cerca(int nodo_pasajero, int &monto_uber ){
+  int* distancia = new int[numero_vertices]; // guarda la cantidad de nodos de distancia desde el nodo de origen del bfs, hasta el que se quiera consultar
+  int* predecesor = new int[numero_vertices]; // indica cual fue la numeracion del nodo anterior al actual
+                                              // ej: predecesor[B] = A  indica que para llegar a B viniste de A 
+  int uber_mas_cercano = -1;
+  int distancia_mas_corta = INFINITO;
+  for(int i = 0; i < numero_ubers; i++ ){
+    bfs(lista_vertices, numero_vertices, ubicaciones_uber[i], distancia, predecesor);
+    if(distancia[nodo_pasajero] < distancia_mas_corta || (distancia[nodo_pasajero] == distancia_mas_corta && ubicaciones_uber[i] < ubicaciones_uber[uber_mas_cercano])){
+      distancia_mas_corta = distancia[nodo_pasajero];
+      uber_mas_cercano = i;
+    }
+  }
+monto_uber = distancia_mas_corta*300;
+delete[] distancia;
+delete[] predecesor;
+return uber_mas_cercano; // es la posicion del conductor en el arreglo donde se almacenan los ubers
+}
+
+int ListaAdyacencia::solicitar_uber(int nodo_inicio, int nodo_final){
+  int* distancia = new int[numero_vertices];
+  int* predecesor = new int[numero_vertices];
+  int monto_uber = 0;  //monto de viaje del uber hasta el pasajero
+  int monto_total = 0; //monto a cobrar
+  int posf_uber = encontrar_uber_mas_cerca(nodo_inicio, monto_uber);
+  int num_nodos_camino = 0; //contador
+  int nodo_actual = nodo_final; //para reconstruir el camino desde el final hasta el inicio
+  int camino[NUM_MAX_COLA];
+  bfs(lista_vertices, numero_vertices, nodo_inicio, distancia, predecesor);
+  while(nodo_actual != -1){
+    camino[num_nodos_camino] = nodo_actual;
+    nodo_actual = predecesor[nodo_actual];
+    num_nodos_camino++;
+  }
+  if (distancia[nodo_final] != INFINITO){
+    monto_total = monto_uber + (num_nodos_camino - 1)*500;
+    cout << "Ruta : { ";
+    for(int i = num_nodos_camino -1; i >= 0; i--){
+      cout << camino[i] << " ";
+    }
+    cout << " }"<< endl << "Costo : " << monto_total << endl;
+    ubicaciones_uber[posf_uber] = nodo_final;
+  }
+  else{
+    cout << "Ruta : {} "<< endl<<"Costo: -1"<< endl;
+  }
+  delete[] distancia;
+  delete[] predecesor;
+  return monto_total;
+}
+
+void bfs(nodo* lista_vertices, int numero_vertices, int nodo_inicial,int* distancia, int* predecesor){
+  tCola aux; 
+  bool nodos_visitados[NUM_MAX_COLA]; //arreglo para marcar los nodos
+  for(int i = 0; i < numero_vertices; i++){ //inicializa los arreglos con las distancias entre vertices
+    distancia[i] = INFINITO;
+    predecesor[i] = -1;
+    nodos_visitados[i] = false; 
+  }                             
+  distancia[nodo_inicial] = 0; 
+  nodos_visitados[nodo_inicial] = true;
+  aux.enqueue(nodo_inicial);
+  while(!aux.vacia()){
+    int nodo_actual;
+    nodo_actual = aux.frontValue();
+    aux.dequeue();
+    nodo* vecino;
+    vecino = lista_vertices[nodo_actual].next;
+    while(vecino != nullptr){
+      int nodo_aux;
+      nodo_aux = vecino->data;
+      if(!nodos_visitados[nodo_aux]){
+        nodos_visitados[nodo_aux] = true;
+        distancia[nodo_aux] = distancia[nodo_actual] + 1;
+        predecesor[nodo_aux] = nodo_actual;
+        aux.enqueue(nodo_aux);
+      }
+      vecino = vecino->next; 
+    }
+  }
+}
+
 ListaAdyacencia leer_data(string nombre_data_txt) {
   string linea_actual;
   ifstream archivo_txt(nombre_data_txt);
@@ -86,7 +220,7 @@ ListaAdyacencia leer_data(string nombre_data_txt) {
   linea_actual = linea_actual.substr(linea_actual.find(" ") + 1);
   int numero_de_aristas = stoi(linea_actual.substr(0, linea_actual.find(" ")));
   int numero_ubers = stoi(linea_actual.substr(linea_actual.find(" ") + 1));
-  ListaAdyacencia lista_adyacencia{numero_de_nodos, numero_de_aristas,
+  ListaAdyacencia lista_adyacencia{numero_de_nodos + 1, numero_de_aristas,
                                    numero_ubers};
   for (int i = 0; i < numero_de_aristas; i++) {
     getline(archivo_txt, linea_actual);
@@ -108,17 +242,31 @@ ListaAdyacencia leer_data(string nombre_data_txt) {
 }
 
 int main() {
+  bool continuar = true;
+  int desde;
+  int hacia;
   ListaAdyacencia lista_adyacencia = leer_data("data1.txt");
-  int *ubicaciones_ubers = lista_adyacencia.obtener_ubicaciones_ubers();
-  for (int i = 0; i < 4; i++) {
-    cout << ubicaciones_ubers[i] << endl;
-  }
+  //int *ubicaciones_ubers = lista_adyacencia.obtener_ubicaciones_ubers();
+  //for (int i = 0; i < 4; i++) {
+    //cout << ubicaciones_ubers[i] << endl;
+  //}
   nodo *array_vertices = lista_adyacencia.obtener_lista_de_vertices();
   for (int i = 0; i < 40; i++) {
     nodo *nodo_actual = array_vertices[i].next;
     while (nodo_actual != nullptr) {
-      cout << "Vecino del nodo " << i << ":" << nodo_actual->data << endl;
+      //cout << "Vecino del nodo " << i << ":" << nodo_actual->data << endl;
       nodo_actual = nodo_actual->next;
     }
   }
+  while (continuar){
+    cout << "Ingrese viaje (Desde/Hacia): ";
+    cin >> desde;
+    cin >> hacia;
+    if (desde == -1 && hacia == -1){
+      continuar = false;
+      continue;
+    }
+    lista_adyacencia.solicitar_uber(desde,hacia);
+  }
+  return 0;
 }
