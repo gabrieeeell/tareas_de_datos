@@ -64,7 +64,7 @@ void bfs(nodo *lista_vertices, int numero_vertices, int nodo_inicial,
 
 class ListaAdyacencia {
   nodo *lista_vertices;
-  
+
   int *ubicaciones_uber;
   int numero_ubers;
   int numero_aristas;
@@ -333,14 +333,13 @@ int main() {
     cout << "Ingrese viaje (Desde/Hacia): ";
     cin >> desde;
     cin >> hacia;
-    if (desde >= lista_adyacencia.numero_vertices || hacia >= lista_adyacencia.numero_vertices){
+    if (desde >= lista_adyacencia.numero_vertices ||
+        hacia >= lista_adyacencia.numero_vertices) {
       cout << "Nodo fuera de rango" << endl;
       continue;
-    }
-    else if (desde == -1 && hacia == -1){
+    } else if (desde == -1 && hacia == -1) {
       continuar = false;
       continue;
-    
     }
     lista_adyacencia.solicitar_uber(desde, hacia);
   }

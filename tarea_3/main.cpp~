@@ -64,13 +64,14 @@ void bfs(nodo *lista_vertices, int numero_vertices, int nodo_inicial,
 
 class ListaAdyacencia {
   nodo *lista_vertices;
-  int numero_vertices; // (numero de nodos)
+
   int *ubicaciones_uber;
   int numero_ubers;
   int numero_aristas;
 
 public:
   // Después debo incluir una función tipo "agregar uber"
+  int numero_vertices; // (numero de nodos)
   ListaAdyacencia(int numero_vertices, int numero_aristas, int numero_ubers);
   int agregar_conexion(int nodo_origen, int nodo_destino);
   int agregar_ubicacion_uber(int ubicacion);
@@ -315,13 +316,13 @@ int main() {
   bool continuar = true;
   int desde;
   int hacia;
-  ListaAdyacencia lista_adyacencia = leer_data("data1.txt");
+  ListaAdyacencia lista_adyacencia = leer_data("data2.txt");
   // int *ubicaciones_ubers = lista_adyacencia.obtener_ubicaciones_ubers();
   // for (int i = 0; i < 4; i++) {
   // cout << ubicaciones_ubers[i] << endl;
   //}
   nodo *array_vertices = lista_adyacencia.obtener_lista_de_vertices();
-  for (int i = 0; i < 40; i++) {
+  for (int i = 0; i < lista_adyacencia.numero_vertices; i++) {
     nodo *nodo_actual = array_vertices[i].next;
     while (nodo_actual != nullptr) {
       // cout << "Vecino del nodo " << i << ":" << nodo_actual->data << endl;
@@ -332,7 +333,11 @@ int main() {
     cout << "Ingrese viaje (Desde/Hacia): ";
     cin >> desde;
     cin >> hacia;
-    if (desde == -1 && hacia == -1) {
+    if (desde >= lista_adyacencia.numero_vertices ||
+        hacia >= lista_adyacencia.numero_vertices) {
+      cout << "Nodo fuera de rango" << endl;
+      continue;
+    } else if (desde == -1 && hacia == -1) {
       continuar = false;
       continue;
     }
