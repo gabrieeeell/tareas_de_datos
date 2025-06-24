@@ -63,14 +63,12 @@ void bfs(nodo *lista_vertices, int numero_vertices, int nodo_inicial,
          int *distancia, int *predecesor);
 
 class ListaAdyacencia {
-  nodo *lista_vertices;
-
   int *ubicaciones_uber;
   int numero_ubers;
   int numero_aristas;
 
 public:
-  // Después debo incluir una función tipo "agregar uber"
+  nodo *lista_vertices;
   int numero_vertices; // (numero de nodos)
   ListaAdyacencia(int numero_vertices, int numero_aristas, int numero_ubers);
   int agregar_conexion(int nodo_origen, int nodo_destino);
@@ -342,6 +340,17 @@ int main() {
       continue;
     }
     lista_adyacencia.solicitar_uber(desde, hacia);
+  }
+  for (int i = 0; i < lista_adyacencia.numero_vertices; i++) {
+    nodo *aux = lista_adyacencia.lista_vertices[i].next;
+    nodo *nodo_actual;
+    while (nodo_actual->next != nullptr) {
+      nodo_actual = aux;
+      aux = nodo_actual->next;
+      delete nodo_actual;
+    }
+    delete aux;
+    delete[] lista_adyacencia.lista_vertices;
   }
   return 0;
 }
